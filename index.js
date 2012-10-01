@@ -7,6 +7,14 @@
 //
 var resource = {};
 
+var EventEmitter = require('eventemitter2').EventEmitter2;
+
+resource = new EventEmitter({
+  wildcard: true, // event emitter should use wildcards ( * )
+  delimiter: '::', // the delimiter used to segment namespaces
+  maxListeners: 20, // the max number of listeners that can be assigned to an event
+});
+
 //
 // Require a simple JSON-Schema validator
 //
@@ -42,7 +50,7 @@ resource.use = function (r, options) {
   // if so, determine if there are any missing deps that will need to be installed
   //
   if (typeof _r.dependencies === 'object') {
-    //resource.installDeps( _r.dependencies);
+    resource.installDeps( _r.dependencies);
   }
 
   //
@@ -90,25 +98,17 @@ resource.use = function (r, options) {
 // Load a resource module by string name
 //
 resource.load = function (r, callback) {
-  //
-  // TODO: clean up nested try / catch
-  //
   var result;
   try {
-    //
-    // First, attempt to load resource as absolute path name
-    //
-    result = require(__dirname + '/../' + r);
+    var p = require.resolve('resources');
+    p = p.replace('/index.js', '/');
+    p += r;
+    result = require(p);
   } catch (err) {
-//    throw err;
     try {
-      //
-      // Altenatively, attempt to load resource as straight npm package name
-      //
-      result = require(__dirname + '/../resources/' + r);
+      result = require(r);
     } catch (err) {
       throw err;
-      result = err;
     }
   }
   return result;
@@ -195,13 +195,9 @@ resource.installDeps = function (deps) {
     // Check to see if the dep is available
     //
     try {
-      console.log(require.resolve(dep));
+      require.resolve(dep);
     } catch (err) {
       _command.push(dep);
-      //
-      // For development purposes, install everything globally for now
-      //
-      _command.push('-g');
     }
   });
 
@@ -217,7 +213,7 @@ resource.installDeps = function (deps) {
   //
   console.log('about to run npm ' + _command);
   var spawn = require('child_process').spawn,
-      ls    = spawn('npm', _command);
+      ls    = spawn('npm', _command, { cwd: __dirname });
 
   ls.stdout.on('data', function (data) {
     if(data.length > 0) {
