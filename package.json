@@ -3,6 +3,10 @@
   "version": "0.0.0",
   "description": "node.js resource",
   "main": "index.js",
+  "dependencies": {
+    "eventemitter2": "*",
+    "resources": "*"
+  },
   "repository": "https://github.com/bigcompany/resource.git",
   "author": "Marak",
   "license": "MIT"
