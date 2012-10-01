@@ -58,6 +58,7 @@ resource.use = function (r, options) {
   //
   this[r] = _r[r];
   this[r].name = r;
+  this[r].dependencies = _r.dependencies || {};
 
   //
   // Certain method names are considered "special" and will automatically be,
