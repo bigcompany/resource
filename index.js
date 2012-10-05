@@ -106,6 +106,7 @@ resource.load = function (r, callback) {
     p += r;
     result = require(p);
   } catch (err) {
+    throw err;
     try {
       result = require(r);
     } catch (err) {
@@ -179,6 +180,11 @@ var mappings = {
 };
 
 //
+// Set "currently installing module count" to 0
+//
+resource.installing = 0;
+
+//
 // Installs missing deps
 //
 resource.installDeps = function (deps) {
@@ -186,55 +192,59 @@ resource.installDeps = function (deps) {
   //
   // TODO: make this work with remote files as well as local
   //
-
   var _command = ["install"];
 
-  resource.installing = 0;
-
   Object.keys(deps).forEach(function(dep){
+    var resourcePath;
+    resource.installing++;
+
     //
     // Check to see if the dep is available
     //
+    resourcePath = require.resolve('resources');
+    resourcePath = resourcePath.replace('/index.js', '/node_modules/');
+    resourcePath += dep;
     try {
-      require.resolve(dep);
+      require.resolve(resourcePath);
+      resource.installing--;
+      console.log('using dependency:', dep);
     } catch (err) {
+      console.log('missing dependency:', dep);
       _command.push(dep);
     }
   });
-
 
   if(_command.length === 1) {
     return;
   }
 
-  resource.installing++;
+  // _command.push('--color', "false");
+
+
+  var home = require.resolve('resources');
+  home = home.replace('/index.js', '/');
 
   //
   // Spawn npm as child process to perform installation
   //
-  console.log('about to run npm ' + _command);
+  console.log('about to run npm ' + _command, 'at', home);
   var spawn = require('child_process').spawn,
-      ls    = spawn('npm', _command, { cwd: __dirname });
+      npm    = spawn('npm', _command, { cwd: home });
 
-  ls.stdout.on('data', function (data) {
-    if(data.length > 0) {
-      //console.log(data.toString());
-    }
+  npm.stdout.on('data', function (data) {
+    //process.stdout.write(data);
   });
 
-  ls.stderr.on('data', function (data) {
-    if(data.length > 0) {
-      //console.log(data.toString());
-    }
+  npm.stderr.on('data', function (data) {
+    process.stderr.write(data);
   });
 
-  ls.on('exit', function (code) {
-    console.log('child process exited with code ' + code);
+  npm.on('exit', function (code) {
+    //console.log('child process exited with code ' + code);
     resource.installing--;
-    console.log(resource.installing)
     if(resource.installing === 0) {
       for(var m in resource._queue){
-        console.log('done installing, running commands')
+        //console.log('done installing, running commands')
         resource._queue[m]();
       }
     }
@@ -394,12 +404,24 @@ function crud (r, options) {
     });
   }
 
+  var _schema = r.schema.properties;
+  var querySchema = {
+    properties: {}
+  }
+  Object.keys(_schema).forEach(function(prop){
+    querySchema.properties[prop] = _schema[prop];
+    querySchema.properties[prop].default = "";
+    querySchema.properties[prop].required = false;
+    querySchema.properties[prop].type = "any";
+    delete querySchema.properties[prop].enum;
+  });
+
   r.method('find', find, {
     "description": "search for instances of " + r.name,
     "properties": {
       "options": {
         "type": "object",
-        "properties": r.schema.properties
+        "properties": querySchema.properties
       },
       "callback": {
         "type": "function"
@@ -410,12 +432,12 @@ function crud (r, options) {
   //
   // All method
   //
-  function all (callback){
+  function all (callback) {
     Model.all({}, callback);
   }
 
   r.method('all', all, {
-    "description": "get all instances of " + r.name,
+    "description": "gets all instances of " + r.name,
     "properties": {
       "callback": {
         "type": "function"
@@ -629,6 +651,9 @@ function addMethod (r, name, method, schema, tap) {
   // store the original method on the fn for later reference ( useful for documentation purposes )
   fn.unwrapped = method;
 
+  // store the name of the method, on the method ( for later reference )
+  fn.name = name;
+
   //
   // The method is bound onto the "methods" property of the resource
   //
@@ -667,7 +692,7 @@ function hoistMethods (r, self) {
             self['_' + m].forEach(function(fn){
               if(typeof options === "function") { // no options sent, just callback
                 callback = options;
-                options = {};
+                options = r.config || {};
               }
               if(resource.installing > 0) {
                 resource._queue.push(function(){
