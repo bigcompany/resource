@@ -207,7 +207,7 @@ resource.installDeps = function (deps) {
     try {
       require.resolve(resourcePath);
       resource.installing--;
-      console.log('using dependency:', dep);
+      //console.log('using dependency:', dep);
     } catch (err) {
       console.log('missing dependency:', dep);
       _command.push(dep);
@@ -403,15 +403,23 @@ function crud (r, options) {
       callback(err, results);
     });
   }
-
-  var _schema = r.schema.properties;
   var querySchema = {
     properties: {}
   }
-  Object.keys(_schema).forEach(function(prop){
-    querySchema.properties[prop] = _schema[prop];
+  Object.keys(r.schema.properties).forEach(function(prop){
+    if(typeof r.schema.properties[prop] === 'object') {
+      querySchema.properties[prop] = {};
+      for (var p in r.schema.properties[prop]) {
+        querySchema.properties[prop][p] = r.schema.properties[prop][p];
+      }
+    } else {
+      querySchema.properties[prop] = r.schema.properties[prop];
+    }
     querySchema.properties[prop].default = "";
     querySchema.properties[prop].required = false;
+    //
+    // TODO: remove the following two lines and make enum search work correctly
+    //
     querySchema.properties[prop].type = "any";
     delete querySchema.properties[prop].enum;
   });
