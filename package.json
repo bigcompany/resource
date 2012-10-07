@@ -4,8 +4,7 @@
   "description": "node.js resource",
   "main": "index.js",
   "dependencies": {
-    "eventemitter2": "*",
-    "resources": "*"
+    "eventemitter2": "*"
   },
   "repository": "https://github.com/bigcompany/resource.git",
   "author": "Marak",
