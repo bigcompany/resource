@@ -20,6 +20,8 @@ resource = new EventEmitter({
 //
 var validator = require('./validator');
 
+var uuid = require('node-uuid');
+
 //
 // On the resource, create a "resources" object that will store a reference to every defined resource
 //
@@ -119,19 +121,21 @@ resource.load = function (r, callback) {
 //
 // Will eventually be renamed and replace resource.define
 //
-resource.define = function (name, schema, data) {
+resource.define = function (name, options) {
 
   //
   // Create an empty resource object
   //
   var r = {};
 
+  options = options || {};
+
   //
   // Initalize the resource with default values
   //
   r.name = name;
   r.methods = {};
-  r.schema = {
+  r.schema = options.schema || {
     "description": "",
     "properties": {
       "id": {
@@ -139,7 +143,11 @@ resource.define = function (name, schema, data) {
       }
     }
   };
-  r.config = {};
+
+  //
+  // If any additional configuration data has been passed in, assign it to the resource
+  //
+  r.config = options.config || {};
 
   //
   // Give the resource a property() method for defining properties
@@ -152,12 +160,16 @@ resource.define = function (name, schema, data) {
   // Give the resource a method() method for defining methods
   //
   r.method = function (name, method, schema) {
+    if (typeof method !== 'function') {
+      throw new Error('a function is required as the second argument');
+    }
     addMethod(r, name, method, schema);
   };
 
-  //
-  // TODO: If any additional data has been passed in, assign it to the resource
-  //
+  if (typeof r.config.datasource !== 'undefined') {
+    crud(r, r.config.datasource);
+  }
+
 
   //
   // Attach a copy of the resource to the resources scope ( for later reference )
@@ -308,6 +320,7 @@ function crud (r, options) {
     database: "big",
     host: options.host,
     port: options.port,
+    path: options.path,
     username: options.username,
     password: options.password,
     https: true // TODO: check that HTTPS actually does something
@@ -333,7 +346,6 @@ function crud (r, options) {
   // Create a new JugglingDB schema based on temp schema
   //
   var Model = schema.define(r.name, _schema);
-
   // TODO: map all JugglingDB crud methods
   // TODO: create before / after hook methods
   // TOOD: map resource methods back onto returned JugglingDB models scoped with primary key ( for convience )
@@ -347,8 +359,11 @@ function crud (r, options) {
   //
   function create (data, callback) {
     //
-    // Creates a new instance using a JugglingDB model
+    // If no id is specified, create one using node-uuid
     //
+    if(typeof data.id === 'undefined' || data.id.length === 0) {
+      data.id = uuid();
+    }
     Model.create(data, callback);
   }
   r.method('create', create, {
@@ -368,7 +383,16 @@ function crud (r, options) {
   // Get method
   //
   function get (id, callback){
-    Model.find(id, callback);
+    // TODO: .all is now broken in fs adapter
+    // NOTE: JugglingDB.find is really resource.get
+    // NOTE: resource.get is JugglingDB.all with a filter
+    Model.find(id, function(err, result){
+      if(result === null) {
+        return callback(new Error(id + ' not found'));
+      }
+      // TODO: check if any of the fields are keys, if so, fetch them
+      callback(err, result);
+    });
   }
   r.method('get', get, {
     "description": "get " + r.name +  " by id",
@@ -457,7 +481,7 @@ function crud (r, options) {
   // Update method
   //
   function update (options, callback){
-    Model.create(options, callback);
+    Model.updateOrCreate(options, callback);
   }
   r.method('update', update, {
     "description": "updates a " + r.name + " by id",
@@ -477,7 +501,9 @@ function crud (r, options) {
   //
   function destroy (id, callback){
     Model.find(id, function(err, result){
-      result.destroy(callback);
+      result.destroy(function(){
+        callback(null, null);
+      });
     });
   }
   r.method('destroy', destroy, {
@@ -553,13 +579,9 @@ function addMethod (r, name, method, schema, tap) {
       //       properties.callback = arguments['1']
       //
       //
+
       if (typeof schema.properties === "object" && typeof schema.properties.options === "object") {
-        _data.options = {};
-        Object.keys(schema.properties.options.properties).forEach(function(prop,i){
-          if(typeof args[0] !== 'undefined') {
-            _data.options[prop] = args[0][prop];
-          }
-        });
+        _data.options = args[0]
       }
 
       if (typeof schema.properties === "object" && typeof schema.properties.options === "undefined") {
@@ -586,13 +608,14 @@ function addMethod (r, name, method, schema, tap) {
           //
           // If a valid callback was provided, continue with the error
           //
-          return callback(validate.errors);
+          return callback({ errors: validate.errors });
         } else {
           //
           // If there is no valid callback, throw an error ( for now )
           //
-          console.log(validate.errors)
-          throw new Error(JSON.stringify(validate.errors));
+          var err = new Error('invalid');
+          err.errors = validate.errors;
+          throw err;
         }
       }
 
@@ -677,6 +700,13 @@ function addMethod (r, name, method, schema, tap) {
 
 function addProperty (r, name, schema) {
   r.schema.properties[name] = schema;
+  //
+  // When adding new properties to a resource,
+  // create an updated JugglingDB Model
+  //
+  if (typeof r.config.datasource !== 'undefined') {
+    crud(r, r.config.datasource);
+  }
 }
 
 resource._queue = [];
