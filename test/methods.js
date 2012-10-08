@@ -80,6 +80,29 @@ test("define method on creature - with schema - and single text argument", funct
   t.end()
 });
 
+test("define method on creature - with schema - and single text argument - with bad input", function (t) {
+  creature.method('talk', function(text){
+    return text;
+  }, {
+    "properties": {
+      "text" : {
+        "type": "string"
+      }
+    }
+  });
+  var result;
+  try {
+    result = creature.talk(123);
+  } catch (err) {
+    t.equal('type', err.errors[0].attribute);
+    t.equal('text', err.errors[0].property);
+    t.equal('number', err.errors[0].actual);
+    t.ok(true, 'did not talk!');
+  }
+  t.end()
+});
+
+
 test("define method on creature - with schema - and two text arguments", function (t) {
   creature.method('talk', function(text, person){
     return text + ':' + person;
@@ -131,6 +154,28 @@ test("define method on creature - with schema - and two arguments - text, callba
   creature.talk('hi!', function(err, result){
     t.equal('hi!', result);
     t.ok(true, 'talked!')
+    t.end()
+  });
+});
+
+test("define method on creature - with schema - and two arguments - text, callback - with bad input", function (t) {
+  creature.method('talk', function(text, callback){
+    return callback(null, text);
+  }, {
+    "properties": {
+      "text": {
+        "type": "string"
+      },
+      "callback": {
+        "type": "function"
+      }
+    }
+  });
+  creature.talk(123, function(err, result){
+    t.equal('type', err.errors[0].attribute);
+    t.equal('text', err.errors[0].property);
+    t.equal('number', err.errors[0].actual);
+    t.ok(true, 'did not talk!');
     t.end()
   });
 });
