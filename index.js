@@ -501,6 +501,9 @@ function crud (r, options) {
   //
   function destroy (id, callback){
     Model.find(id, function(err, result){
+      if (err) {
+        return callback(err);
+      }
       result.destroy(function(){
         callback(null, null);
       });
