@@ -556,11 +556,6 @@ function crud (r, options) {
 //
 function addMethod (r, name, method, schema, tap) {
 
-  schema = schema || {};
-
-  if (typeof schema.description === 'undefined') {
-    schema.description = "";
-  }
 
   //
   // Create a new method that will act as a wrap for the passed in "method"
@@ -600,6 +595,10 @@ function addMethod (r, name, method, schema, tap) {
 
       var _instance = {},
           _data = {};
+
+      if (typeof schema.description === 'undefined') {
+        schema.description = "";
+      }
 
       //
       //  Merge in arguments data based on supplied schema
