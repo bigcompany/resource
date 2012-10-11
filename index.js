@@ -166,6 +166,29 @@ resource.define = function (name, options) {
     addMethod(r, name, method, schema);
   };
 
+  //
+  // Give the resource a .before() method for defining before hooks on resource methods
+  //
+  r.before = function (method, callback) {
+    //
+    // If no method exists on the resource yet create a place holder,
+    // in order to be able to lazily define hooks on methods that dont exist yet
+    //
+    if(typeof r.methods[method] !== 'function') {
+      r.methods[method] = function () {};
+      r.methods[method].before = [];
+      r.methods[method]._before = [];
+    }
+    //
+    // method exists on resource, push this new hook callback
+    //
+    r.methods[method].before.unshift(callback);
+    r.methods[method]._before.unshift(callback);
+  };
+
+  // TODO: create after hooks
+  r.after = function (method, callback) {};
+
   if (typeof r.config.datasource !== 'undefined') {
     crud(r, r.config.datasource);
   }
@@ -551,6 +574,25 @@ function addMethod (r, name, method, schema, tap) {
         callback = args[args.length -1];
 
     //
+    // Check for any before hooks,
+    // if they exist, execute them in LIFO order
+    //
+    if(Array.isArray(fn._before) && fn._before.length > 0) {
+      var before = fn._before.pop();
+      before(args[0], function(err, data){
+        fn.apply(this, [data, callback]);
+      });
+      return;
+    }
+
+    //
+    // After all the hooks complete, repopulate the internal fn._before array
+    //
+    fn.before.forEach(function(b){
+      fn._before.push(b);
+    })
+
+    //
     // Inside this method, we must take into account any schema,
     // which has been defined with the method signature and validate against it
     //
@@ -687,6 +729,26 @@ function addMethod (r, name, method, schema, tap) {
 
   // store the name of the method, on the method ( for later reference )
   fn.name = name;
+
+  // placeholders for before and after hooks
+  fn.before = [];
+  fn._before = [];
+
+  //
+  // If the method about to be defined, already has a stub containing hooks,
+  // copy those hooks to the newly defined fn that is about to be created
+  // These previous stubs will then be overwritten.
+  // This is used to allow the ability to define hooks on,
+  // lazily defined resource methods
+  //
+  if(typeof r.methods[name] !== 'undefined') {
+    if (Array.isArray(r.methods[name].before)){
+      r.methods[name].before.forEach(function(b){
+        fn.before.push(b);
+        fn._before.push(b);
+      });
+    }
+  }
 
   //
   // The method is bound onto the "methods" property of the resource
