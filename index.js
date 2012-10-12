@@ -20,7 +20,11 @@ resource = new EventEmitter({
 //
 var validator = require('./validator');
 
-var uuid = require('node-uuid');
+var uuid = resource.uuid = require('node-uuid');
+
+resource.installing = {};
+resource._queue = [];
+
 
 //
 // On the resource, create a "resources" object that will store a reference to every defined resource
@@ -47,28 +51,22 @@ resource.use = function (r, options) {
     throw new Error("exports." + r + " is not defined in the " + r + ' resource!')
   }
 
+
+  _r.name = r;
+
   //
   // Determine if a exports.dependencies hash has been specified,
   // if so, determine if there are any missing deps that will need to be installed
   //
   if (typeof _r.dependencies === 'object') {
-    resource.installDeps( _r.dependencies);
+    resource.installDeps(_r);
   }
 
   //
   // Attach a copy of the resource to "this" scope ( which may or may not be the resource module scope )
   //
   this[r] = _r[r];
-  this[r].name = r;
   this[r].dependencies = _r.dependencies || {};
-
-  //
-  // Certain method names are considered "special" and will automatically be,
-  // hoisted and aggregated into common event handler
-  //
-  // ex: "start", "listen", "connect"
-  //
-  hoistMethods(this[r], self);
 
   //
   // Any options passed into resource.use('foo', options),
@@ -215,23 +213,17 @@ var mappings = {
 };
 
 //
-// Set "currently installing module count" to 0
-//
-resource.installing = 0;
-
-//
 // Installs missing deps
 //
-resource.installDeps = function (deps) {
+resource.installDeps = function (r) {
 
   //
   // TODO: make this work with remote files as well as local
   //
   var _command = ["install"];
 
-  Object.keys(deps).forEach(function(dep){
+  Object.keys(r.dependencies).forEach(function(dep){
     var resourcePath;
-    resource.installing++;
 
     //
     // Check to see if the dep is available
@@ -241,11 +233,15 @@ resource.installDeps = function (deps) {
     resourcePath += dep;
     try {
       require.resolve(resourcePath);
-      resource.installing--;
       //console.log('using dependency:', dep);
     } catch (err) {
-      console.log('missing dependency:', dep);
-      _command.push(dep);
+      console.log(r.name + ' resource is missing a required dependency:', dep);
+      // TODO: check to see if dep is already in the process of being installed,
+      // if so, don't attempt to install it twice
+      if (typeof resource.installing[dep] === 'undefined') {
+        resource.installing[dep] = {};
+        _command.push(dep);
+      }
     }
   });
 
@@ -255,31 +251,41 @@ resource.installDeps = function (deps) {
 
   // _command.push('--color', "false");
 
-
   var home = require.resolve('resources');
   home = home.replace('/index.js', '/');
 
   //
   // Spawn npm as child process to perform installation
   //
-  console.log('about to run npm ' + _command, 'at', home);
+  console.log('installing missing deps with running npm');
+  console.log('npm ' + _command.join(' '), '@', home);
+
   var spawn = require('child_process').spawn,
       npm    = spawn('npm', _command, { cwd: home });
 
   npm.stdout.on('data', function (data) {
-    //process.stdout.write(data);
+    process.stdout.write(data);
   });
 
   npm.stderr.on('data', function (data) {
     process.stderr.write(data);
   });
 
+  npm.on('error', function(){
+    console.log('npm installation error!');
+    process.exit();
+  });
+
   npm.on('exit', function (code) {
-    //console.log('child process exited with code ' + code);
-    resource.installing--;
-    if(resource.installing === 0) {
+    _command.forEach(function(c, i){
+      if(i !== 0) { // the first command is "install"
+        delete resource.installing[c];
+      }
+    });
+    if(Object.keys(resource.installing).length === 0) {
+      console.log('npm installation complete');
+      console.log('now executing ' + resource._queue.length + ' defferred call(s)');
       for(var m in resource._queue){
-        //console.log('done installing, running commands')
         resource._queue[m]();
       }
     }
@@ -469,6 +475,7 @@ function crud (r, options) {
     //
     querySchema.properties[prop].type = "any";
     delete querySchema.properties[prop].enum;
+    delete querySchema.properties[prop].format;
   });
 
   r.method('find', find, {
@@ -556,7 +563,6 @@ function crud (r, options) {
 //
 function addMethod (r, name, method, schema, tap) {
 
-
   //
   // Create a new method that will act as a wrap for the passed in "method"
   //
@@ -567,6 +573,14 @@ function addMethod (r, name, method, schema, tap) {
 
     var payload = [],
         callback = args[args.length -1];
+
+    if(Object.keys(resource.installing).length > 0) {
+      resource._queue.unshift(function(){
+        fn.apply(this, args);
+      });
+      console.log('deffering execution of "' + r.name + '.' + name + '" since dependencies are currently installing');
+      return;
+    }
 
     //
     // Check for any before hooks,
@@ -677,7 +691,6 @@ function addMethod (r, name, method, schema, tap) {
       //
       // Check to see if a callback was expected, but not provided.
       //
-
       if(typeof schema.properties === 'object' && typeof schema.properties.callback === 'object' && typeof callback === 'undefined') {
         //
         // If so, create a "dummy" callback so _method() won't crash
@@ -721,7 +734,9 @@ function addMethod (r, name, method, schema, tap) {
   };
 
   // store the schema on the fn for later reference
-  fn.schema = schema;
+  fn.schema = schema || {
+    "description": ""
+  };
 
   // store the original method on the fn for later reference ( useful for documentation purposes )
   fn.unwrapped = method;
@@ -774,44 +789,6 @@ function addProperty (r, name, schema) {
 }
 
 resource._queue = [];
-
-//
-// Aggregates and hoists any "special" defined methods, such as "start", "listen", "connect", etc...
-//
-function hoistMethods (r, self) {
-  //
-  // Check for special methods to get hoisted onto big
-  //
-  var hoist = ['start', 'connect', 'listen']; // TODO: un-hardcode configurable hoist methods
-  for (var m in r.methods) {
-    if (typeof r.methods[m] === 'function' && hoist.indexOf(m) !== -1) {
-      function queue (m) {
-        if(typeof self['_' + m] === "undefined") {
-          self['_' + m] = [];
-          self[m] = function (options, callback) {
-            // TODO: async iterator
-            // TODO: un-hardcode options/callback signature
-            self['_' + m].forEach(function(fn){
-              if(typeof options === "function") { // no options sent, just callback
-                callback = options;
-                options = r.config || {};
-              }
-              if(resource.installing > 0) {
-                resource._queue.push(function(){
-                  fn(options, callback);
-                });
-              } else {
-                fn(options, callback);
-              }
-            });
-          };
-        }
-        self['_' + m].push(r.methods[m]);
-      }
-      queue(m);
-    }
-  }
-}
 
 //
 // Creates a "safe" non-circular JSON object for easy stringification purposes
