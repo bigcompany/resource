@@ -85,20 +85,61 @@ test("run it again", function (t) {
 
 test("adding creature.before('poke') - before creature.poke is defined", function (t) {
   creature.before('poke', function (data, next) {
-    next(null, data);
+    data = "poked!";
+    return next(null, data);
   });
   t.equal(creature.methods.poke.before.length, 1);
   t.end();
 });
 
-// broken, fix methods.js tests
-/*
-test("defining and running creature.poke", function (t) {
-  creature.method('poke', function(data){
-    console.log('poked', data);
-    return 'poked!';
-  })
-  creature.poke('foo', function(err, result){
+test("remove all before hooks on creature.create", function (t) {
+  for(var i=0; i <= creature.methods.create.before.length + 1; i++) {
+    creature.methods.create.before.pop();
+  }
+  for(var i=0; i <= creature.methods.create._before.length + 1; i++) {
+    creature.methods.create._before.pop();
+  }
+  t.equal(creature.methods.create.before.length, 0);
+  t.equal(creature.methods.create._before.length, 0);
+  t.end();
+});
+
+test("run creature.create again - with any before hooks", function (t) {
+  creature.create({ id: 'bobby' }, function(err, result){
+    t.equal(result.id, 'bobby');
+    t.end();
   });
 });
-*/
+
+test("defining and running creature.poke", function (t) {
+  creature.method('poke', function(data){
+    return data;
+  });
+  t.equal('poked!', creature.poke('foo'));
+  t.end();
+});
+
+test("adding creature.after('create')", function (t) {
+  t.equal(creature.create._after.length, 0);
+  creature.after('create', function (data) {
+    t.equal('jimmy', data.id);
+  });
+  t.equal(creature.create.after.length, 1);
+  creature.create({ id: 'jimmy' }, function(err, result){
+    t.type(err, "null");
+    t.end();
+  });
+});
+
+test("adding another creature.after('create')", function (t) {
+  t.equal(creature.create._after.length, 1);
+  creature.after('create', function (data) {
+    console.log('send out an email to ', data.id)
+    t.equal('jimmy', data.id);
+  });
+  t.equal(creature.create.after.length, 2);
+  creature.create({ id: 'jimmy' }, function(err, result){
+    t.type(err, "null");
+    t.end();
+  });
+});
