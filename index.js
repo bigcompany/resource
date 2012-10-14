@@ -20,7 +20,8 @@ resource = new EventEmitter({
 //
 var validator = require('./validator');
 
-var uuid = resource.uuid = require('node-uuid');
+var uuid   = resource.uuid   = require('node-uuid');
+var helper = resource.helper = require('./lib/helper');
 
 resource.installing = {};
 resource._queue = [];
@@ -50,7 +51,6 @@ resource.use = function (r, options) {
   if (typeof _r[r] === 'undefined') {
     throw new Error("exports." + r + " is not defined in the " + r + ' resource!')
   }
-
 
   _r.name = r;
 
@@ -98,21 +98,67 @@ resource.use = function (r, options) {
 //
 // Load a resource module by string name
 //
-resource.load = function (r, callback) {
-  var result;
+resource.load = function (r) {
+  //
+  // Check to see if the resource exists in the $CWD/resources/ path
+  //
   try {
+    require.resolve(process.cwd() + '/resources/' + r)
+    //
+    // If so, require it
+    //
+    result = require(process.cwd() + '/resources/' + r);
+  } catch (err) {
+    //
+    // If not, check to see if the resource exists in "resources" package on npm
+    //
+
+    //
+    // Attempt to resolve "resources"
+    //
     var p = require.resolve('resources');
     p = p.replace('/index.js', '/');
     p += r;
-    result = require(p);
-  } catch (err) {
-    throw err;
     try {
-      result = require(r);
+      require.resolve(p);
     } catch (err) {
-      throw err;
+      //
+      // Resource was not found in $CWD/resources/ or in the "resources" npm package
+      //
+      throw new Error('invalid resource' + p);
     }
+
+    //
+    // Since the resource was found in the "resources" package, copy it to $CWD/resources
+    //
+
+    try {
+      require('fs').mkdirSync('./resources/');
+      // TODO: add more content to this README file
+      require('fs').writeFileSync('./resources/README.md', '# Resources Readme');
+    } catch (err) {
+      // do nothing
+    }
+
+    try {
+      require('fs').mkdirSync('./resources/'+ r);
+    } catch (err) {
+      // do nothing
+    }
+
+    console.log('info: installing ' + r + ' resource to ' + process.cwd() + '/' + r);
+
+    //
+    // Perform a sync directory copy from node_modules folder to CWD
+    //
+    helper.copyDir(p, process.cwd() + '/resources/' + r);
+
+    //
+    // Copy the contents of  /resources/theresource/ to $CWD/resources/theresource
+    //
+    result = require(p);
   }
+
   return result;
 };
 
@@ -176,6 +222,8 @@ resource.define = function (name, options) {
       r.methods[method] = function () {};
       r.methods[method].before = [];
       r.methods[method]._before = [];
+      r.methods[method].after = [];
+      r.methods[method]._after = [];
     }
     //
     // method exists on resource, push this new hook callback
@@ -184,8 +232,24 @@ resource.define = function (name, options) {
     r.methods[method]._before.unshift(callback);
   };
 
-  // TODO: create after hooks
-  r.after = function (method, callback) {};
+  r.after = function (method, callback) {
+    //
+    // If no method exists on the resource yet create a place holder,
+    // in order to be able to lazily define hooks on methods that dont exist yet
+    //
+    if(typeof r.methods[method] !== 'function') {
+      r.methods[method] = function () {};
+      r.methods[method].before = [];
+      r.methods[method]._before = [];
+      r.methods[method].after = [];
+      r.methods[method]._after = [];
+    }
+    //
+    // method exists on resource, push this new hook callback
+    //
+    r.methods[method].after.push(callback);
+    r.methods[method]._after.push(callback);
+  };
 
   if (typeof r.config.datasource !== 'undefined') {
     crud(r, r.config.datasource);
@@ -228,8 +292,7 @@ resource.installDeps = function (r) {
     //
     // Check to see if the dep is available
     //
-    resourcePath = require.resolve('resources');
-    resourcePath = resourcePath.replace('/index.js', '/node_modules/');
+    resourcePath = process.cwd() + '/node_modules/';
     resourcePath += dep;
     try {
       require.resolve(resourcePath);
@@ -261,7 +324,7 @@ resource.installDeps = function (r) {
   console.log('npm ' + _command.join(' '), '@', home);
 
   var spawn = require('child_process').spawn,
-      npm    = spawn('npm', _command, { cwd: home });
+      npm    = spawn('npm', _command, { cwd: process.cwd() });
 
   npm.stdout.on('data', function (data) {
     process.stdout.write(data);
@@ -567,12 +630,12 @@ function addMethod (r, name, method, schema, tap) {
   // Create a new method that will act as a wrap for the passed in "method"
   //
   var fn = function () {
-
     var args  = Array.prototype.slice.call(arguments),
         _args = [];
 
     var payload = [],
         callback = args[args.length -1];
+
 
     if(Object.keys(resource.installing).length > 0) {
       resource._queue.unshift(function(){
@@ -588,10 +651,9 @@ function addMethod (r, name, method, schema, tap) {
     //
     if(Array.isArray(fn._before) && fn._before.length > 0) {
       var before = fn._before.pop();
-      before(args[0], function(err, data){
-        fn.apply(this, [data, callback]);
+      return before(args[0], function(err, data) {
+        return fn.apply(this, [data, callback]);
       });
-      return;
     }
 
     //
@@ -662,6 +724,7 @@ function addMethod (r, name, method, schema, tap) {
       // If the schema validation fails, do not fire the wrapped method
       //
       if (!validate.valid) {
+        resource.emit(r.name + '::' + name + '::error', { errors: validate.errors });
         if (typeof callback === 'function') {
           //
           // If a valid callback was provided, continue with the error
@@ -720,9 +783,23 @@ function addMethod (r, name, method, schema, tap) {
       // convention of the last argument being a callback andd will be added to the end of the array
       //
       if(typeof callback === 'function') {
-        _args.push(callback);
+        _args.push(function(){
+          //
+          // Since the method has completed, emit it as an event event
+          //
+          resource.emit(r.name + '::' + name, args);
+          //
+          // check for after hooks, execute FIFO
+          //
+          if(Array.isArray(fn._after) && fn._after.length > 0) {
+            fn._after.reverse();
+            fn._after.forEach(function(after){
+              after.call(this, args['0']);
+            });
+          }
+          return callback.apply(this, arguments);
+        });
       }
-
     } else {
       _args = args;
     }
@@ -747,6 +824,8 @@ function addMethod (r, name, method, schema, tap) {
   // placeholders for before and after hooks
   fn.before = [];
   fn._before = [];
+  fn.after = [];
+  fn._after = [];
 
   //
   // If the method about to be defined, already has a stub containing hooks,
@@ -822,7 +901,6 @@ resource.schema = {
 
 resource.methods = [];
 resource.name = "resource";
-
 
 // TODO: add check for exports.dependencies requirements
 module['exports'] = resource;
