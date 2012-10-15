@@ -754,12 +754,11 @@ function addMethod (r, name, method, schema, tap) {
       //
       // Check to see if a callback was expected, but not provided.
       //
-      if(typeof schema.properties === 'object' && typeof schema.properties.callback === 'object' && typeof callback === 'undefined') {
+      if(typeof schema.properties === 'object' && typeof schema.properties.callback === 'object' && typeof callback !== 'function') {
         //
         // If so, create a "dummy" callback so _method() won't crash
         //
         callback = function (err, result) {
-
           //
           // In the "dummy" callback, add a throw handler for errors,
           // so that any possible async error won't die silently
@@ -783,18 +782,18 @@ function addMethod (r, name, method, schema, tap) {
       // convention of the last argument being a callback andd will be added to the end of the array
       //
       if(typeof callback === 'function') {
-        _args.push(function(){
+        _args.push(function(err, result){
           //
-          // Since the method has completed, emit it as an event event
+          // Since the method has completed, emit it as an event
           //
-          resource.emit(r.name + '::' + name, args);
+          resource.emit(r.name + '::' + name, result);
           //
           // check for after hooks, execute FIFO
           //
           if(Array.isArray(fn._after) && fn._after.length > 0) {
             fn._after.reverse();
             fn._after.forEach(function(after){
-              after.call(this, args['0']);
+              after.call(this, result);
             });
           }
           return callback.apply(this, arguments);
