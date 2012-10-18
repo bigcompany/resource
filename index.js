@@ -764,6 +764,8 @@ function addMethod (r, name, method, schema, tap) {
           // so that any possible async error won't die silently
           //
           if (err) {
+            console.log('warn: about to throw an error from ' + r.name + '.' + name + ' since no callback was provided and an async error occurred!');
+            console.log('info: adding a callback argument to ' + r.name + '.' + name + ' will prevent this throw from happening');
             throw err;
           }
           //
@@ -784,17 +786,22 @@ function addMethod (r, name, method, schema, tap) {
       if(typeof callback === 'function') {
         _args.push(function(err, result){
           //
-          // Since the method has completed, emit it as an event
+          // Only consider the method complete, if it has not errored
           //
-          resource.emit(r.name + '::' + name, result);
-          //
-          // check for after hooks, execute FIFO
-          //
-          if(Array.isArray(fn._after) && fn._after.length > 0) {
-            fn._after.reverse();
-            fn._after.forEach(function(after){
-              after.call(this, result);
-            });
+          if (err === null) {
+            //
+            // Since the method has completed, emit it as an event
+            //
+            resource.emit(r.name + '::' + name, result);
+            //
+            // Check for after hooks, execute FIFO
+            // Resource.after() hooks will NOT be executed if an error has occured on the event the hook is attached to
+            if(Array.isArray(fn._after) && fn._after.length > 0) {
+              fn._after.reverse();
+              fn._after.forEach(function(after){
+                after.call(this, result);
+              });
+            }
           }
           return callback.apply(this, arguments);
         });
