@@ -26,22 +26,29 @@ test("define creature resource - with datasource config", function (t) {
   t.end()
 });
 
+test("adding a module-scoped Resource.beforeAll(fn)", function (t) {
+  resource.beforeAll(function (data, callback) {
+    data.id = "not-bobby";
+    callback(null, data);
+  });
+  creature.create({ id: 'bobby' }, function(err, result){
+    t.type(err, "null");
+    t.equal('not-bobby', result.id);
+    t.end();
+  });
+});
+
 test("adding creature.before('create')", function (t) {
-
   t.equal(creature.create._before.length, 0);
-
   creature.before('create', function (data, next) {
     data.id = "larry";
     next(null, data);
   });
-  
   t.equal(creature.create.before.length, 1);
-
   creature.create({ id: 'bobby' }, function(err, result){
     t.equal(result.id, 'larry');
     t.end();
   });
-
 });
 
 test("adding another creature.before('create')", function (t) {
@@ -55,7 +62,6 @@ test("adding another creature.before('create')", function (t) {
     t.end();
   });
 });
-
 
 test("run it again", function (t) {
   creature.create({ id: 'bobby' }, function(err, result){
