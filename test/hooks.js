@@ -98,7 +98,7 @@ test("adding creature.before('poke') - before creature.poke is defined", functio
   t.end();
 });
 
-test("remove all before hooks on creature.create", function (t) {
+test("remove before hooks on creature.create - run creature.create", function (t) {
   for(var i=0; i <= creature.methods.create.before.length + 1; i++) {
     creature.methods.create.before.pop();
   }
@@ -107,10 +107,21 @@ test("remove all before hooks on creature.create", function (t) {
   }
   t.equal(creature.methods.create.before.length, 0);
   t.equal(creature.methods.create._before.length, 0);
-  t.end();
+  creature.create({ id: 'bobby' }, function(err, result){
+    t.equal(result.id, 'not-bobby');
+    t.end();
+  });
 });
 
-test("run creature.create again - with any before hooks", function (t) {
+test("remove beforeAll hooks on resource - run creature.create", function (t) {
+  for(var i=0; i <= resource.before.length + 1; i++) {
+    resource.before.pop();
+  }
+  for(var i=0; i <= resource._before.length + 1; i++) {
+    resource._before.pop();
+  }
+  t.equal(resource.before.length, 0);
+  t.equal(resource._before.length, 0);
   creature.create({ id: 'bobby' }, function(err, result){
     t.equal(result.id, 'bobby');
     t.end();
