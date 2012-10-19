@@ -26,7 +26,6 @@ var helper = resource.helper = require('./lib/helper');
 resource.installing = {};
 resource._queue = [];
 
-
 //
 // On the resource, create a "resources" object that will store a reference to every defined resource
 //
@@ -274,6 +273,22 @@ resource.define = function (name, options) {
 var mappings = {
   "couch": "cradle",
   "couchdb": "cradle"
+};
+
+resource._before = [];
+resource.before = [];
+
+//
+// For attaching module-scoped Resource.before hooks onto all resources.
+// This differs from calling .before on a resource instance such as creature.before('create'),
+// in that resource.beforeAll(fn) hooks will execute before all resource methods
+//
+resource.beforeAll = function (callback) {
+  //
+  // Method exists on resource, push this new hook callback
+  //
+  resource.before.unshift(callback);
+  resource._before.unshift(callback);
 };
 
 //
@@ -636,13 +651,23 @@ function addMethod (r, name, method, schema, tap) {
     var payload = [],
         callback = args[args.length -1];
 
-
     if(Object.keys(resource.installing).length > 0) {
       resource._queue.unshift(function(){
         fn.apply(this, args);
       });
       console.log('deffering execution of "' + r.name + '.' + name + '" since dependencies are currently installing');
       return;
+    }
+
+    //
+    // Check for any beforeAll hooks,
+    // if they exist, execute them in LIFO order
+    //
+    if(Array.isArray(resource._before) && resource._before.length > 0) {
+      var before = resource._before.pop();
+      return before(args[0], function(err, data) {
+        return fn.apply(this, [data, callback]);
+      });
     }
 
     //
@@ -662,6 +687,13 @@ function addMethod (r, name, method, schema, tap) {
     fn.before.forEach(function(b){
       fn._before.push(b);
     })
+
+    //
+    // After all the hooks complete, repopulate the internal fn._before array
+    //
+    resource.before.forEach(function(b){
+      resource._before.push(b);
+    });
 
     //
     // Inside this method, we must take into account any schema,
