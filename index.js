@@ -94,10 +94,16 @@ resource.use = function (r, options) {
 
 };
 
+
 //
 // Load a resource module by string name
 //
 resource.load = function (r) {
+
+  //
+  // TODO: Check DIRNAME before checking process.cwd()
+  //
+
   //
   // Check to see if the resource exists in the $CWD/resources/ path
   //
@@ -130,7 +136,6 @@ resource.load = function (r) {
     //
     // Since the resource was found in the "resources" package, copy it to $CWD/resources
     //
-
     try {
       require('fs').mkdirSync('./resources/');
       // TODO: add more content to this README file
@@ -732,8 +737,8 @@ function addMethod (r, name, method, schema, tap) {
       //
       //
 
-      if (typeof schema.properties === "object" && typeof schema.properties.options === "object") {
-        _data.options = args[0]
+      if (typeof schema.properties === "object" && typeof schema.properties.options === "object" && typeof args[0] === "object") {
+        _data.options = args[0];
       }
 
       if (typeof schema.properties === "object" && typeof schema.properties.options === "undefined") {
@@ -764,11 +769,9 @@ function addMethod (r, name, method, schema, tap) {
           return callback({ errors: validate.errors });
         } else {
           //
-          // If there is no valid callback, throw an error ( for now )
+          // If there is no valid callback, return an error ( for now )
           //
-          var err = new Error('invalid');
-          err.errors = validate.errors;
-          throw err;
+          return validate.errors;
         }
       }
 
@@ -779,6 +782,10 @@ function addMethod (r, name, method, schema, tap) {
       //
       // Convert schema data back into arguments array
       //
+      if(Object.keys(_instance).length === 0) {
+        _args = args;
+      }
+
       Object.keys(_instance).forEach(function(item){
         _args.push(_instance[item]);
       });
