@@ -109,14 +109,11 @@ test("define method on creature - with schema - and single text argument - with 
     }
   });
   var result;
-  try {
-    result = creature.talk(123);
-  } catch (err) {
-    t.equal('type', err.errors[0].attribute);
-    t.equal('text', err.errors[0].property);
-    t.equal('number', err.errors[0].actual);
-    t.ok(true, 'did not talk!');
-  }
+  result = creature.talk(123);
+  t.equal('type', result[0].attribute);
+  t.equal('text', result[0].property);
+  t.equal('number', result[0].actual);
+  t.ok(true, 'did not talk!');
   t.end()
 });
 
@@ -138,6 +135,16 @@ test("define method on creature - with schema - and two text arguments", functio
   t.ok(true, 'talked!')
   t.end()
 });
+
+test("define method on creature - with empty schema - and two arguments", function (t) {
+  creature.method('talk', function(text, person){
+    return text + ':' + person;
+  }, {});
+  t.equal('hi:marak', creature.talk('hi', 'marak'));
+  t.ok(true, 'talked!')
+  t.end()
+});
+
 
 test("define method on creature - with schema - and one callback argument", function (t) {
   creature.method('poke', function(callback){
@@ -223,6 +230,49 @@ test("define method on creature - with schema - and two arguments - options, cal
     t.equal('up', result.direction);
     t.equal('HIGH', result.power);
     t.ok(true, 'fired!')
+    t.end()
+  });
+});
+
+test("define method on creature - with number schema - and good input", function (t) {
+  creature.method('hit', function(damage, callback){
+    damage++;
+    return callback(null, damage);
+  }, {
+    "properties": {
+      "damage": {
+        "type": "number"
+      },
+      "callback": {
+        "type": "function"
+      }
+    }
+  });
+  creature.hit(8999, function(err, result){
+    t.equal(result, 9000);
+    t.ok(true, 'hit for 9000!');
+    t.end()
+  });
+});
+
+test("define method on creature - with number schema - and bad input", function (t) {
+  creature.method('hit', function(damage, callback){
+    damage++;
+    return callback(null, damage);
+  }, {
+    "properties": {
+      "damage": {
+        "type": "number"
+      },
+      "callback": {
+        "type": "function"
+      }
+    }
+  });
+  creature.hit("abc", function(err, result){
+    t.equal('type', err.errors[0].attribute);
+    t.equal('damage', err.errors[0].property);
+    t.equal('string', err.errors[0].actual);
     t.end()
   });
 });
