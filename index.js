@@ -22,6 +22,7 @@ var validator = require('./validator');
 
 var uuid   = resource.uuid   = require('node-uuid');
 var helper = resource.helper = require('./lib/helper');
+var logger = resource.logger = require('./lib/logger');
 
 resource.installing = {};
 resource._queue = [];
@@ -149,8 +150,7 @@ resource.load = function (r) {
     } catch (err) {
       // do nothing
     }
-
-    console.log('info: installing ' + r + ' resource to ' + process.cwd() + '/' + r);
+    logger.info('installing ' + r.magenta + ' to ' + process.cwd() + '/' + r)
 
     //
     // Perform a sync directory copy from node_modules folder to CWD
@@ -166,9 +166,6 @@ resource.load = function (r) {
   return result;
 };
 
-//
-// Will eventually be renamed and replace resource.define
-//
 resource.define = function (name, options) {
 
   //
@@ -318,7 +315,7 @@ resource.installDeps = function (r) {
       require.resolve(resourcePath);
       //console.log('using dependency:', dep);
     } catch (err) {
-      console.log(r.name + ' resource is missing a required dependency:', dep);
+      logger.warn(r.name + ' resource is missing a required dependency: ' + dep)
       // TODO: check to see if dep is already in the process of being installed,
       // if so, don't attempt to install it twice
       if (typeof resource.installing[dep] === 'undefined') {
@@ -340,8 +337,8 @@ resource.installDeps = function (r) {
   //
   // Spawn npm as child process to perform installation
   //
-  console.log('installing missing deps with running npm');
-  console.log('npm ' + _command.join(' '), '@', home);
+  logger.warn('spawning npm to install missing dependencies')
+  logger.exec('npm ' + _command.join(' '));
 
   var spawn = require('child_process').spawn,
       npm    = spawn('npm', _command, { cwd: process.cwd() });
@@ -355,7 +352,7 @@ resource.installDeps = function (r) {
   });
 
   npm.on('error', function(){
-    console.log('npm installation error!');
+    logger.error('npm installation error!');
     process.exit();
   });
 
@@ -366,8 +363,8 @@ resource.installDeps = function (r) {
       }
     });
     if(Object.keys(resource.installing).length === 0) {
-      console.log('npm installation complete');
-      console.log('now executing ' + resource._queue.length + ' defferred call(s)');
+      logger.info('npm installation complete');
+      logger.warn('now executing ' + resource._queue.length + ' defferred call(s)');
       for(var m in resource._queue){
         resource._queue[m]();
       }
@@ -660,7 +657,7 @@ function addMethod (r, name, method, schema, tap) {
       resource._queue.unshift(function(){
         fn.apply(this, args);
       });
-      console.log('deffering execution of "' + r.name + '.' + name + '" since dependencies are currently installing');
+      logger.warn('deffering execution of "' + r.name + '.' + name + '" since dependencies are currently installing');
       return;
     }
 
@@ -787,7 +784,9 @@ function addMethod (r, name, method, schema, tap) {
       }
 
       Object.keys(_instance).forEach(function(item){
-        _args.push(_instance[item]);
+        if(item !== 'callback') {
+          _args.push(_instance[item]);
+        }
       });
 
       //
@@ -803,8 +802,8 @@ function addMethod (r, name, method, schema, tap) {
           // so that any possible async error won't die silently
           //
           if (err) {
-            console.log('warn: about to throw an error from ' + r.name + '.' + name + ' since no callback was provided and an async error occurred!');
-            console.log('info: adding a callback argument to ' + r.name + '.' + name + ' will prevent this throw from happening');
+            logger.warn('about to throw an error from ' + r.name + '.' + name + ' since no callback was provided and an async error occurred!');
+            logger.help('adding a callback argument to ' + r.name + '.' + name + ' will prevent this throw from happening');
             throw err;
           }
           //
@@ -852,7 +851,20 @@ function addMethod (r, name, method, schema, tap) {
     //
     // Everything seems okay, execute the method with the modified arguments
     //
-    return method.apply(this, _args);
+    var result = method.apply(this, _args);
+
+    //
+    // If a non-undefined result was returned, consider it a sync method,
+    // and emit the event name with the result
+    //
+    if(typeof result !== 'undefined') {
+      resource.emit(r.name + '::' + name, result);
+    }
+
+    //
+    // Could still return undefined, and that is OK
+    //
+    return result;
   };
 
   // store the schema on the fn for later reference
@@ -947,5 +959,4 @@ resource.schema = {
 resource.methods = [];
 resource.name = "resource";
 
-// TODO: add check for exports.dependencies requirements
 module['exports'] = resource;
