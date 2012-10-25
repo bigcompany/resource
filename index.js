@@ -183,9 +183,6 @@ resource.define = function (name, options) {
   r.schema = options.schema || {
     "description": "",
     "properties": {
-      "id": {
-        "type": "any"
-      }
     }
   };
 
@@ -253,6 +250,9 @@ resource.define = function (name, options) {
   };
 
   if (typeof r.config.datasource !== 'undefined') {
+    r.schema.properties.id = {
+      "type": "any"
+    };
     crud(r, r.config.datasource);
   }
 
