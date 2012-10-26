@@ -807,13 +807,12 @@ function addMethod (r, name, method, schema, tap) {
             throw err;
           }
           //
-          // Since a method that expected a callback, was called without a callback,
-          // nothing is done with the result.
+          // Since a method that expected a callback was called without a callback,
+          // nothing is done with the result. Consider this a "fire and forget"
           //
           // console.log(result);
           //
         };
-
       }
 
       //
@@ -822,30 +821,52 @@ function addMethod (r, name, method, schema, tap) {
       // convention of the last argument being a callback andd will be added to the end of the array
       //
       if(typeof callback === 'function') {
+        //
+        // If a callback already exists as the last argument,
+        // remove it
+        //
+        if(typeof _args[_args.length - 1] === "function") {
+          _args.pop();
+        }
+        //
+        // Add the wrapped callback as the last argument
+        //
         _args.push(function(err, result){
-          //
-          // Only consider the method complete, if it has not errored
-          //
-          if (err === null) {
-            //
-            // Since the method has completed, emit it as an event
-            //
-            resource.emit(r.name + '::' + name, result);
-            //
-            // Check for after hooks, execute FIFO
-            // Resource.after() hooks will NOT be executed if an error has occured on the event the hook is attached to
-            if(Array.isArray(fn._after) && fn._after.length > 0) {
-              fn._after.reverse();
-              fn._after.forEach(function(after){
-                after.call(this, result);
-              });
-            }
-          }
-          return callback.apply(this, arguments);
+          return callbackWrap(err, result);
         });
       }
     } else {
       _args = args;
+      if(typeof callback === "function") {
+        //
+        // Replace the original callback with the new wrapped callback
+        //
+        _args[_args.length -1] = function(err, result){
+          return callbackWrap(err, result);
+        };
+      }
+    }
+
+    function callbackWrap (err, result) {
+      //
+      // Only consider the method complete, if it has not errored
+      //
+      if (err === null) {
+        //
+        // Since the method has completed, emit it as an event
+        //
+        resource.emit(r.name + '::' + name, result);
+        //
+        // Check for after hooks, execute FIFO
+        // Resource.after() hooks will NOT be executed if an error has occured on the event the hook is attached to
+        if(Array.isArray(fn._after) && fn._after.length > 0) {
+          fn._after.reverse();
+          fn._after.forEach(function(after){
+            after.call(this, result);
+          });
+        }
+      }
+      return callback.apply(this, arguments);
     }
 
     //
@@ -853,11 +874,7 @@ function addMethod (r, name, method, schema, tap) {
     //
     var result = method.apply(this, _args);
 
-    //
-    // If a non-undefined result was returned, consider it a sync method,
-    // and emit the event name with the result
-    //
-    if(typeof result !== 'undefined') {
+    if(typeof callback !== 'function') {
       resource.emit(r.name + '::' + name, result);
     }
 
