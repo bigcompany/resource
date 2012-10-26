@@ -25,65 +25,7 @@ test("define method on creature - with no method", function (t) {
   t.end()
 });
 
-test("define method on creature - with no schema - and no args", function (t) {
-  creature.method('poke', function(){
-    return 'poked';
-  });
-  t.equal('poked', creature.poke());
-  t.ok(true, 'poked!')
-  t.end()
-});
-
-test("define method on creature - with no schema - and callback", function (t) {
-  creature.method('poke', function(callback){
-    callback(null, 'poked');
-  });
-  creature.poke(function(err, result){
-    t.equal('poked', result);
-    t.ok(true, 'poked!')
-    t.end()
-  });
-});
-
-test("define method on creature - with no schema - and single argument", function (t) {
-  creature.method('talk', function(text){
-    return text;
-  });
-  t.equal('hi', creature.talk('hi'));
-  t.ok(true, 'talked!')
-  t.end()
-});
-
-test("define method on creature - with no schema - and two arguments", function (t) {
-  creature.method('talk', function(text, person){
-    return text + ':' + person;
-  });
-  t.equal('hi:marak', creature.talk('hi', 'marak'));
-  t.ok(true, 'talked!')
-  t.end()
-});
-
-test("define method on creature - with no schema - and callback", function (t) {
-  creature.method('talk', function(callback){
-    callback(null, 'hi')
-  });
-  creature.talk(function(err, result){
-    t.equal('hi', result);
-    t.end()
-  });
-});
-
-test("define method on creature - with no schema - single argument, and callback", function (t) {
-  creature.method('talk', function(text, callback){
-    callback(null, text);
-  });
-  creature.talk('hi', function(err, result){
-    t.equal('hi', result);
-    t.end()
-  });
-});
-
-test("define method on creature - with schema - and single text argument", function (t) {
+test("define method on creature - with schema - single text argument", function (t) {
   creature.method('talk', function(text){
     return text;
   }, {
@@ -117,7 +59,6 @@ test("define method on creature - with schema - and single text argument - with 
   t.end()
 });
 
-
 test("define method on creature - with schema - and two text arguments", function (t) {
   creature.method('talk', function(text, person){
     return text + ':' + person;
@@ -135,16 +76,6 @@ test("define method on creature - with schema - and two text arguments", functio
   t.ok(true, 'talked!')
   t.end()
 });
-
-test("define method on creature - with empty schema - and two arguments", function (t) {
-  creature.method('talk', function(text, person){
-    return text + ':' + person;
-  }, {});
-  t.equal('hi:marak', creature.talk('hi', 'marak'));
-  t.ok(true, 'talked!')
-  t.end()
-});
-
 
 test("define method on creature - with schema - and one callback argument", function (t) {
   creature.method('poke', function(callback){
