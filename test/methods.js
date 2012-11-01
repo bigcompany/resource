@@ -207,3 +207,25 @@ test("define method on creature - with number schema - and bad input", function 
     t.end()
   });
 });
+
+test("define method on creature - with required string schema - and bad input", function (t) {
+  creature.method('hit', function(target, callback){
+    return callback(null, target);
+  }, {
+    "properties": {
+      "target": {
+        "type": "string",
+        "required": true
+      },
+      "callback": {
+        "type": "function"
+      }
+    }
+  });
+  creature.hit("", function(err, result){
+    t.equal('required', err.errors[0].attribute);
+    t.equal('target', err.errors[0].property);
+    t.equal('', err.errors[0].actual);
+    t.end()
+  });
+});
