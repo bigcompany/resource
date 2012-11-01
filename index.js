@@ -73,7 +73,6 @@ resource.use = function (r, options) {
   // will be considered configuration options, and bound to resource.config
   //
   this[r].config = options || {};
-
   //
   // Attach a copy of the resource to the resource module scope for later reference
   //
@@ -94,7 +93,6 @@ resource.use = function (r, options) {
   return this[r];
 
 };
-
 
 //
 // Load a resource module by string name
@@ -183,6 +181,9 @@ resource.define = function (name, options) {
   r.schema = options.schema || {
     "description": "",
     "properties": {
+      "id": {
+        "type": "any"
+      }
     }
   };
 
