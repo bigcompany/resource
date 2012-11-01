@@ -424,6 +424,14 @@ Copyright (c) 2009-2010 Alexis Sellier, Charlie Robbins, Nodejitsu Inc.
       }
     }
 
+    if (value === "") {
+      if (schema.required && schema.type === 'string') {
+        return error('required', property, "", schema, errors);
+      } else {
+        return;
+      }
+    }
+
     if (schema.format && options.validateFormats) {
       format = schema.format;
 
