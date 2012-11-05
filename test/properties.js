@@ -16,12 +16,12 @@ test("define creature resource", function (t) {
   t.end()
 });
 
-// broken
 test("define property on creature - with no schema", function (t) {
   creature.property('name'); // should default to string
   t.type(creature.schema, 'object', 'creature.schema should be an object');
   t.type(creature.schema.properties, 'object', 'creature.schema.properties should be an object');
-  //t.type(creature.schema.properties.name, 'object', 'creature.schema.properties.name should be an object');
+  t.type(creature.schema.properties.name, 'object', 'creature.schema.properties.name should be an object');
+  t.type(creature.schema.properties.name.type, 'string', 'creature.schema.properties.name.type should be of type any');
   t.end()
 });
 
@@ -33,3 +33,12 @@ test("define property on creature - with schema", function (t) {
   t.equal(creature.schema.properties.title.type, 'string');
   t.end();
 });
+
+test("define array property on creature", function (t) {
+  creature.property('friends', {
+    "type": "array"
+  });
+  t.equal(creature.schema.properties.friends.type, 'array');
+  t.end();
+});
+
