@@ -5,7 +5,8 @@
   "main": "index.js",
   "dependencies": {
     "eventemitter2": "*",
-    "node-uuid": "*"
+    "node-uuid": "*",
+    "colors": "*"
   },
   "repository": "https://github.com/bigcompany/resource.git",
   "author": "Marak",
