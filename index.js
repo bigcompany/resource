@@ -530,6 +530,7 @@ function crud (r, options) {
         delete query[k];
       }
     }
+
     Model.all(query, function(err, results){
       if (!Array.isArray(results)) {
         results = [results];
@@ -537,6 +538,7 @@ function crud (r, options) {
       callback(err, results);
     });
   }
+
   var querySchema = {
     properties: {}
   }
@@ -547,7 +549,7 @@ function crud (r, options) {
         querySchema.properties[prop][p] = r.schema.properties[prop][p];
       }
     } else {
-      querySchema.properties[prop] = r.schema.properties[prop];
+      querySchema.properties[prop] = r.schema.properties[prop] || {};
     }
     querySchema.properties[prop].default = "";
     querySchema.properties[prop].required = false;
@@ -932,6 +934,13 @@ function addMethod (r, name, method, schema, tap) {
 }
 
 function addProperty (r, name, schema) {
+
+  if (typeof schema === 'undefined') {
+    schema = {
+      "type": "string"
+    }
+  }
+
   r.schema.properties[name] = schema;
   //
   // When adding new properties to a resource,
