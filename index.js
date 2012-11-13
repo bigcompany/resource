@@ -786,6 +786,17 @@ function addMethod (r, name, method, schema, tap) {
         _args = args;
       }
 
+      //
+      // In the case that a schema was provided but additional arguments,
+      // were passed into the resource method call outside of the schema,
+      // make sure to add back those additional arguments
+      //
+      if (args.length > _args.length) {
+        for (var i = _args.length; i < args.length; i++) {
+          _args.push(args[i]);
+        }
+      }
+
       Object.keys(_instance).forEach(function(item){
         if(item !== 'callback') {
           _args.push(_instance[item]);
