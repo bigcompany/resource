@@ -229,3 +229,21 @@ test("define method on creature - with required string schema - and bad input", 
     t.end()
   });
 });
+
+
+test("define method on creature - with schema - and additional non-schema arguments", function (t) {
+  creature.method('talk', function (text, target){
+    return { text: text, target: target };
+  }, {
+    "properties": {
+      "text" : {
+        "type": "string"
+      }
+    }
+  });
+  var result = creature.talk('hi', 'bob');
+  t.equal('hi', result.text);
+  t.equal('bob', result.target);
+  t.ok(true, 'talked!')
+  t.end()
+});
