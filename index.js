@@ -791,11 +791,17 @@ function addMethod (r, name, method, schema, tap) {
       // were passed into the resource method call outside of the schema,
       // make sure to add back those additional arguments
       //
-      if (args.length > _args.length) {
-        for (var i = _args.length; i < args.length; i++) {
-          _args.push(args[i]);
+
+        /*
+        //
+        // If the amount of args passed in, exceeds the amount of expected args, but not overwrite default optional args
+        //
+        if (args.length > _args.length) {
+          for (var i = _args.length; i < args.length; i++) {
+            _args.push(args[i]);
+          }
         }
-      }
+        */
 
       Object.keys(_instance).forEach(function(item){
         if(item !== 'callback') {
