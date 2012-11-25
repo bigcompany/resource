@@ -100,6 +100,10 @@ resource.use = function (r, options) {
 resource.load = function (r) {
 
   //
+  // TODO: better resource loading logic
+  //
+
+  //
   // TODO: Check DIRNAME before checking process.cwd()
   //
 
@@ -321,7 +325,7 @@ resource.installDeps = function (r) {
       // if so, don't attempt to install it twice
       if (typeof resource.installing[dep] === 'undefined') {
         resource.installing[dep] = {};
-        _command.push(dep);
+        _command.push(dep + '@' + r.dependencies[dep]);
       }
     }
   });
