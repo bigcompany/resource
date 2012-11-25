@@ -18,7 +18,7 @@ resource = new EventEmitter({
 //
 // Require a simple JSON-Schema validator
 //
-var validator = require('./validator');
+var validator = require('./vendor/validator');
 
 var uuid   = resource.uuid   = require('node-uuid');
 var helper = resource.helper = require('./lib/helper');
@@ -424,7 +424,7 @@ function crud (r, options) {
   //
   // Require JugglingDB.Schema
   //
-  var Schema = require('jugglingdb').Schema;
+  var Schema = require('./vendor/jugglingdb').Schema;
 
   //
   // Create new JugglingDB schema, based on incoming datasource type

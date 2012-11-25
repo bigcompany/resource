@@ -1,6 +1,6 @@
 {
   "name": "resource",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "node.js resource",
   "main": "index.js",
   "dependencies": {
@@ -8,7 +8,9 @@
     "node-uuid": "*",
     "colors": "*"
   },
+  "scripts": {
+    "test": "tap test/"
+  },
   "repository": "https://github.com/bigcompany/resource.git",
-  "author": "Marak",
   "license": "MIT"
 }

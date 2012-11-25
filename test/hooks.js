@@ -160,3 +160,5 @@ test("adding another creature.after('create')", function (t) {
     t.end();
   });
 });
+
+// TODO: add after hooks for sync methods

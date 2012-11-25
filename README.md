@@ -1,1 +1,1 @@
-# resource.js
+# resource engine
