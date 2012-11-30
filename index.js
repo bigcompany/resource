@@ -23,6 +23,7 @@ var validator = require('./vendor/validator');
 var uuid   = resource.uuid   = require('node-uuid');
 var helper = resource.helper = require('./lib/helper');
 var logger = resource.logger = require('./lib/logger');
+var persistence = require('./lib/persistence');
 
 resource.installing = {};
 resource._queue = [];
@@ -87,7 +88,7 @@ resource.use = function (r, options) {
   // see: github.com/1602/jugglingdb
   //
   if (typeof this[r].config.datasource !== 'undefined') {
-    crud(this[r], this[r].config.datasource);
+    persistence.enable(this[r], this[r].config.datasource);
   }
 
   return this[r];
@@ -152,7 +153,7 @@ resource.load = function (r) {
     } catch (err) {
       // do nothing
     }
-    logger.info('installing ' + r.magenta + ' to ' + process.cwd() + '/' + r)
+    logger.info('installing ' + r.magenta + ' to ' + (process.cwd() + '/' + r).grey);
 
     //
     // Perform a sync directory copy from node_modules folder to CWD
@@ -258,7 +259,7 @@ resource.define = function (name, options) {
     r.schema.properties.id = {
       "type": "any"
     };
-    crud(r, r.config.datasource);
+    persistence.enable(r, r.config.datasource);
   }
 
 
@@ -274,13 +275,6 @@ resource.define = function (name, options) {
 
 };
 
-//
-// Provider API mapping for JugglingDB to datasource API for convenience
-//
-var mappings = {
-  "couch": "cradle",
-  "couchdb": "cradle"
-};
 
 resource._before = [];
 resource.before = [];
@@ -320,7 +314,7 @@ resource.installDeps = function (r) {
       require.resolve(resourcePath);
       //console.log('using dependency:', dep);
     } catch (err) {
-      logger.warn(r.name + ' resource is missing a required dependency: ' + dep)
+      logger.warn(r.name.magenta + ' resource is missing a required dependency: ' + dep.yellow)
       // TODO: check to see if dep is already in the process of being installed,
       // if so, don't attempt to install it twice
       if (typeof resource.installing[dep] === 'undefined') {
@@ -342,7 +336,7 @@ resource.installDeps = function (r) {
   //
   // Spawn npm as child process to perform installation
   //
-  logger.warn('spawning npm to install missing dependencies')
+  logger.warn('spawning ' + 'npm'.grey + ' to install missing dependencies')
   logger.exec('npm ' + _command.join(' '));
 
   var spawn = require('child_process').spawn,
@@ -364,7 +358,9 @@ resource.installDeps = function (r) {
   npm.on('exit', function (code) {
     _command.forEach(function(c, i){
       if(i !== 0) { // the first command is "install"
-        delete resource.installing[c];
+        var dep = c.split('@'); // split the dep name based on packagename@semver syntax
+        dep = dep[0]; // take the package name
+        delete resource.installing[dep]; // remove it from the list of installing packages
       }
     });
     if(Object.keys(resource.installing).length === 0) {
@@ -375,6 +371,7 @@ resource.installDeps = function (r) {
       }
     }
   });
+
 };
 
 //
@@ -406,244 +403,8 @@ var instantiate = resource.instantiate = function (schema, levelData) {
   });
 
   return obj;
+
 }
-
-//
-// Extends a resource with CRUD methods by,
-// creating a JugglingDB model to back the resource,
-// allowing the resource to be instantiable and backed by a datasource
-//
-function crud (r, options) {
-
-  if(typeof options === "string") {
-    options = {
-      type: options
-    };
-  }
-
-  //
-  // Require JugglingDB.Schema
-  //
-  var Schema = require('./vendor/jugglingdb').Schema;
-
-  //
-  // Create new JugglingDB schema, based on incoming datasource type
-  //
-  var _type = mappings[options.type] || options.type || 'fs';
-  var schema = new Schema(_type, {
-    database: "big",
-    host: options.host,
-    port: options.port,
-    path: options.path,
-    username: options.username,
-    password: options.password,
-    https: true // TODO: check that HTTPS actually does something
-  });
-
-  //
-  // Create empty schema object for mapping between resource and JugglingDB
-  //
-  var _schema = {};
-
-  //
-  // For every property in the resource schema, map the property to JugglingDB
-  //
-  Object.keys(r.schema.properties).forEach(function(p){
-    var prop = resource.schema.properties[p];
-    //
-    // TODO: Better type detection
-    //
-    _schema[p] = { type: String }; // TODO: not everything is a string
-  });
-
-  //
-  // Create a new JugglingDB schema based on temp schema
-  //
-  var Model = schema.define(r.name, _schema);
-  // TODO: map all JugglingDB crud methods
-  // TODO: create before / after hook methods
-  // TOOD: map resource methods back onto returned JugglingDB models scoped with primary key ( for convience )
-
-  //
-  // Attach the CRUD methods to the resource
-  //
-
-  //
-  // CREATE method
-  //
-  function create (data, callback) {
-    //
-    // If no id is specified, create one using node-uuid
-    //
-    if(typeof data.id === 'undefined' || data.id.length === 0) {
-      data.id = uuid();
-    }
-    Model.create(data, callback);
-  }
-  r.method('create', create, {
-    "description": "create a new " + r.name,
-    "properties": {
-      "options": {
-        "type": "object",
-        "properties": r.schema.properties
-      },
-      "callback": {
-        "type": "function"
-      }
-    }
-  });
-
-  //
-  // Get method
-  //
-  function get (id, callback){
-    // TODO: .all is now broken in fs adapter
-    // NOTE: JugglingDB.find is really resource.get
-    // NOTE: resource.get is JugglingDB.all with a filter
-    Model.find(id, function(err, result){
-      if(result === null) {
-        return callback(new Error(id + ' not found'));
-      }
-      // TODO: check if any of the fields are keys, if so, fetch them
-      callback(err, result);
-    });
-  }
-  r.method('get', get, {
-    "description": "get " + r.name +  " by id",
-    "properties": {
-      "id": {
-        "type": "any",
-        "description": "the id of the object",
-        "required": true
-      },
-      "callback": {
-        "type": "function"
-      }
-    }
-  });
-
-  //
-  // Find method
-  //
-  function find (query, callback) {
-    //
-    // Remove any empty values from the query
-    //
-    for(var k in query) {
-      if(query[k].length === 0) {
-        delete query[k];
-      }
-    }
-
-    Model.all(query, function(err, results){
-      if (!Array.isArray(results)) {
-        results = [results];
-      }
-      callback(err, results);
-    });
-  }
-
-  var querySchema = {
-    properties: {}
-  }
-  Object.keys(r.schema.properties).forEach(function(prop){
-    if(typeof r.schema.properties[prop] === 'object') {
-      querySchema.properties[prop] = {};
-      for (var p in r.schema.properties[prop]) {
-        querySchema.properties[prop][p] = r.schema.properties[prop][p];
-      }
-    } else {
-      querySchema.properties[prop] = r.schema.properties[prop] || {};
-    }
-    querySchema.properties[prop].default = "";
-    querySchema.properties[prop].required = false;
-    //
-    // TODO: remove the following two lines and make enum search work correctly
-    //
-    querySchema.properties[prop].type = "any";
-    delete querySchema.properties[prop].enum;
-    delete querySchema.properties[prop].format;
-  });
-
-  r.method('find', find, {
-    "description": "search for instances of " + r.name,
-    "properties": {
-      "options": {
-        "type": "object",
-        "properties": querySchema.properties
-      },
-      "callback": {
-        "type": "function"
-      }
-    }
-  });
-
-  //
-  // All method
-  //
-  function all (callback) {
-    Model.all({}, callback);
-  }
-
-  r.method('all', all, {
-    "description": "gets all instances of " + r.name,
-    "properties": {
-      "callback": {
-        "type": "function"
-      }
-    }
-  });
-
-  //
-  // Update method
-  //
-  function update (options, callback){
-    Model.updateOrCreate(options, callback);
-  }
-  r.method('update', update, {
-    "description": "updates a " + r.name + " by id",
-    "properties": {
-      "options": {
-        "type": "object",
-        "properties": r.schema.properties
-      },
-      "callback": {
-        "type": "function"
-      }
-    }
-  });
-
-  //
-  // Destroy method
-  //
-  function destroy (id, callback){
-    Model.find(id, function(err, result){
-      if (err) {
-        return callback(err);
-      }
-      result.destroy(function(){
-        callback(null, null);
-      });
-    });
-  }
-  r.method('destroy', destroy, {
-    "description": "destroys a " + r.name + " by id",
-    "properties": {
-      "id": {
-        "type": "any",
-        "description": "the id of the object",
-        "required": true
-      },
-      "callback": {
-        "type": "function"
-      }
-    }
-  });
-
-  // assign model to resource
-  r.model = Model;
-}
-
 
 //
 // Attachs a method onto a resources as a named function with optional schema and tap
@@ -664,7 +425,7 @@ function addMethod (r, name, method, schema, tap) {
       resource._queue.unshift(function(){
         fn.apply(this, args);
       });
-      logger.warn('deffering execution of "' + r.name + '.' + name + '" since dependencies are currently installing');
+      logger.warn('deffering execution of `' + (r.name + '.' + name).yellow + '` since dependencies are missing');
       return;
     }
 
@@ -968,7 +729,7 @@ function addProperty (r, name, schema) {
   // create an updated JugglingDB Model
   //
   if (typeof r.config.datasource !== 'undefined') {
-    crud(r, r.config.datasource);
+    persistence.enable(r, r.config.datasource);
   }
 }
 
