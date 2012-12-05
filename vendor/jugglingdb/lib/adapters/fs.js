@@ -3,14 +3,16 @@ exports.initialize = function initializeSchema(schema, callback) {
     process.nextTick(callback);
 };
 
-function Fs(options) {
+function Fs (options) {
     options = options || {};
 
     //
     // TODO: remove big logic here, move to resource.js project
     //
-    str = require.resolve('big');
-    str = str.replace('big.js', 'db/')
+    //console.log(__dirname, process.cwd())
+    //str = require.resolve('big');
+    //str = str.replace('big.js', 'db/')
+    str = process.cwd() + '/db/';
     //
     // END TODO
     //
