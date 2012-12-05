@@ -6,11 +6,11 @@
   "dependencies": {
     "eventemitter2": "*",
     "node-uuid": "*",
-    "colors": "*"
+    "colors": "*",
+    "resources": "*"
   },
   "scripts": {
     "test": "tap test/"
   },
-  "repository": "https://github.com/bigcompany/resource.git",
   "license": "MIT"
 }
