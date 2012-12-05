@@ -12,5 +12,8 @@
   "scripts": {
     "test": "tap test/"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "tap": "~0.3.3"
+  }
 }
