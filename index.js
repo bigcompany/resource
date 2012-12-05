@@ -20,10 +20,12 @@ resource = new EventEmitter({
 //
 var validator = require('./vendor/validator');
 
-var uuid   = resource.uuid   = require('node-uuid');
 var helper = resource.helper = require('./lib/helper');
 var logger = resource.logger = require('./lib/logger');
 var persistence = require('./lib/persistence');
+
+// map uuid creator onto resource as a convience
+resource.uuid = persistence.uuid;
 
 resource.installing = {};
 resource._queue = [];
@@ -39,6 +41,10 @@ resource.resources = {};
 resource.use = function (r, options) {
 
   var self = this;
+
+  //
+  // TODO: Ensure that we are working within a package
+  //
 
   //
   // Load the resource as a node.js module
@@ -107,63 +113,72 @@ resource.load = function (r) {
   //
   // TODO: Check DIRNAME before checking process.cwd()
   //
-
-  //
-  // Check to see if the resource exists in the $CWD/resources/ path
-  //
   try {
-    require.resolve(process.cwd() + '/resources/' + r)
+    require.resolve(__dirname + '/resources/' + r)
     //
     // If so, require it
     //
-    result = require(process.cwd() + '/resources/' + r);
+    result = require(__dirname + '/resources/' + r);
   } catch (err) {
-    //
-    // If not, check to see if the resource exists in "resources" package on npm
-    //
 
     //
-    // Attempt to resolve "resources"
+    // Check to see if the resource exists in the $CWD/resources/ path
     //
-    var p = require.resolve('resources');
-    p = p.replace('/index.js', '/');
-    p += r;
     try {
-      require.resolve(p);
+      require.resolve(process.cwd() + '/resources/' + r)
+      //
+      // If so, require it
+      //
+      result = require(process.cwd() + '/resources/' + r);
     } catch (err) {
       //
-      // Resource was not found in $CWD/resources/ or in the "resources" npm package
+      // If not, check to see if the resource exists in "resources" package on npm
       //
-      throw new Error('invalid resource' + p);
+
+      //
+      // Attempt to resolve "resources"
+      //
+      var p = require.resolve('resources');
+      p = p.replace('/index.js', '/');
+      p += r;
+      try {
+        require.resolve(p);
+      } catch (err) {
+        //
+        // Resource was not found in $CWD/resources/ or in the "resources" npm package
+        //
+        throw new Error('invalid resource' + p);
+      }
+
+      //
+      // Since the resource was found in the "resources" package, copy it to $CWD/resources
+      //
+      try {
+        require('fs').mkdirSync('./resources/');
+        // TODO: add more content to this README file
+        require('fs').writeFileSync('./resources/README.md', '# Resources Readme');
+      } catch (err) {
+        // do nothing
+      }
+
+      try {
+        require('fs').mkdirSync('./resources/'+ r);
+      } catch (err) {
+        // do nothing
+      }
+      logger.info('installing ' + r.magenta + ' to ' + (process.cwd() + '/' + r).grey);
+
+      //
+      // Perform a sync directory copy from node_modules folder to CWD
+      //
+      helper.copyDir(p, process.cwd() + '/resources/' + r);
+
+      //
+      // Copy the contents of  /resources/theresource/ to $CWD/resources/theresource
+      //
+      result = require(p);
     }
 
-    //
-    // Since the resource was found in the "resources" package, copy it to $CWD/resources
-    //
-    try {
-      require('fs').mkdirSync('./resources/');
-      // TODO: add more content to this README file
-      require('fs').writeFileSync('./resources/README.md', '# Resources Readme');
-    } catch (err) {
-      // do nothing
-    }
-
-    try {
-      require('fs').mkdirSync('./resources/'+ r);
-    } catch (err) {
-      // do nothing
-    }
-    logger.info('installing ' + r.magenta + ' to ' + (process.cwd() + '/' + r).grey);
-
-    //
-    // Perform a sync directory copy from node_modules folder to CWD
-    //
-    helper.copyDir(p, process.cwd() + '/resources/' + r);
-
-    //
-    // Copy the contents of  /resources/theresource/ to $CWD/resources/theresource
-    //
-    result = require(p);
   }
 
   return result;
@@ -209,7 +224,7 @@ resource.define = function (name, options) {
   //
   r.method = function (name, method, schema) {
     if (typeof method !== 'function') {
-      throw new Error('a function is required as the second argument');
+      throw new Error('a function is required as the second argument to `resource.method()`');
     }
     addMethod(r, name, method, schema);
   };
@@ -366,7 +381,7 @@ resource.installDeps = function (r) {
     if(Object.keys(resource.installing).length === 0) {
       logger.info('npm installation complete');
       logger.warn('now executing ' + resource._queue.length + ' defferred call(s)');
-      for(var m in resource._queue){
+      for(var m in resource._queue) {
         resource._queue[m]();
       }
     }
