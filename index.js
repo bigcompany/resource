@@ -140,7 +140,7 @@ resource.load = function (r) {
       //
       // Resource was not found in $CWD/resources/ or in the "resources" npm package
       //
-      throw new Error('invalid resource' + p);
+      throw new Error('no resource found at: ' + p.grey);
     }
 
     //
@@ -523,7 +523,6 @@ function addMethod (r, name, method, schema, tap) {
       // Create a new schema instance with default values, mixed in with supplied arguments data
       //
       _instance = resource.instantiate(schema, _data);
-
       //
       // Perform a schema validation on the new instance to ensure validity
       //
