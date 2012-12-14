@@ -771,6 +771,39 @@ resource.schema = {
   properties: {}
 };
 
+//
+// Create logger resource
+//
+
+  var _logger = resource.define('logger');
+  _logger.schema.description = "a simple STDOUT based logger";
+  //
+  // TODO: improve log method schema
+  _logger.method("log", logger.put, {
+    "description": "logs data to STDOUT",
+    "properties": {
+      "data": {
+        "type": "any"
+      }
+    }
+  });
+
+  //
+  // Override original logger with new logger resource
+  // TODO: cleanup override logic
+  resource.logger = _logger;
+
+  //
+  // Preserve old logging levels
+  //
+  for(var level in logger.levels) {
+    resource.logger[level] = logger[level];
+  }
+
+//
+// end logger resource
+//
+
 resource.methods = [];
 resource.name = "resource";
 
