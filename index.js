@@ -423,7 +423,8 @@ function addMethod (r, name, method, schema, tap) {
   //
   var fn = function () {
     var args  = Array.prototype.slice.call(arguments),
-        _args = [];
+        _args = [],
+        validationError;
 
     var payload = [],
         callback = args[args.length -1];
@@ -532,12 +533,21 @@ function addMethod (r, name, method, schema, tap) {
       // If the schema validation fails, do not fire the wrapped method
       //
       if (!validate.valid) {
-        resource.emit(r.name + '::' + name + '::error', { errors: validate.errors });
+        //
+        // Create an error of type Error
+        //
+        validationError = new Error(
+          'Invalid arguments for method `' + r.name + '.' + name + '`. Try logging `err.errors`'
+        );
+        validationError.errors = validate.errors;
+
+        resource.emit(r.name + '::' + name + '::error', validationError);
         if (typeof callback === 'function') {
           //
           // If a valid callback was provided, continue with the error
           //
-          return callback({ errors: validate.errors });
+
+          return callback(validationError);
         } else {
           //
           // If there is no valid callback, return an error ( for now )
