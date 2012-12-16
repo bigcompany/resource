@@ -22,7 +22,10 @@ var validator = require('./vendor/validator');
 
 var helper = resource.helper = require('./lib/helper');
 var logger = resource.logger = require('./lib/logger');
-var persistence = require('./lib/persistence');
+var persistence = resource.persistence = require('./lib/persistence');
+
+resource.load = require('./lib/load');
+resource.use = require('./lib/use');
 
 // map uuid creator onto resource as a convience
 resource.uuid = persistence.uuid;
@@ -34,147 +37,6 @@ resource._queue = [];
 // On the resource, create a "resources" object that will store a reference to every defined resource
 //
 resource.resources = {};
-
-//
-// Use a resource by string name
-//
-resource.use = function (r, options) {
-
-  var self = this;
-
-  //
-  // TODO: Ensure that we are working within a package
-  //
-
-  //
-  // Load the resource as a node.js module
-  //
-  var _r = resource.load(r);
-
-  //
-  // If the required resource doesn't have the expected exported scope,
-  // throw a friendly error message
-  //
-  if (typeof _r[r] === 'undefined') {
-    throw new Error("exports." + r + " is not defined in the " + r + ' resource!')
-  }
-
-  _r.name = r;
-
-  //
-  // Determine if a exports.dependencies hash has been specified,
-  // if so, determine if there are any missing deps that will need to be installed
-  //
-  if (typeof _r.dependencies === 'object') {
-    resource.installDeps(_r);
-  }
-
-  //
-  // Attach a copy of the resource to "this" scope ( which may or may not be the resource module scope )
-  //
-  this[r] = _r[r];
-  this[r].dependencies = _r.dependencies || {};
-
-  //
-  // Any options passed into resource.use('foo', options),
-  // will be considered configuration options, and bound to resource.config
-  //
-  this[r].config = options || {};
-  //
-  // Attach a copy of the resource to the resource module scope for later reference
-  //
-  resource[r] = _r[r];
-  resource.resources[r] = this[r];
-
-  //
-  // If a database configuration has been specified, attach CRUD methods to resource.
-  // This adds methods such as Resource.create / Resource.get.
-  // With a datasource specification, resources can persist.
-  // Persisting resources requires an additional dependency of "jugglingdb"
-  // see: github.com/1602/jugglingdb
-  //
-  if (typeof this[r].config.datasource !== 'undefined') {
-    persistence.enable(this[r], this[r].config.datasource);
-  }
-
-  return this[r];
-
-};
-
-//
-// Load a resource module by string name
-//
-resource.load = function (r) {
-
-  //
-  // TODO: better resource loading logic
-  //
-
-  //
-  // TODO: Check DIRNAME before checking process.cwd()
-  //
-
-  //
-  // Check to see if the resource exists in the $CWD/resources/ path
-  //
-  try {
-    require.resolve(process.cwd() + '/resources/' + r)
-    //
-    // If so, require it
-    //
-    result = require(process.cwd() + '/resources/' + r);
-  } catch (err) {
-    //
-    // If not, check to see if the resource exists in "resources" package on npm
-    //
-
-    //
-    // Attempt to resolve "resources"
-    //
-    var p = require.resolve('resources');
-    p = p.replace('/index.js', '/');
-    p += r;
-    try {
-      require.resolve(p);
-    } catch (err) {
-      //
-      // Resource was not found in $CWD/resources/ or in the "resources" npm package
-      //
-      throw new Error('no resource found at: ' + p.grey);
-    }
-
-    //
-    // Since the resource was found in the "resources" package, copy it to $CWD/resources
-    //
-    try {
-      require('fs').mkdirSync('./resources/');
-      // TODO: add more content to this README file
-      require('fs').writeFileSync('./resources/README.md', '# Resources Readme');
-    } catch (err) {
-      // do nothing
-    }
-
-    try {
-      require('fs').mkdirSync('./resources/'+ r);
-    } catch (err) {
-      // do nothing
-    }
-    logger.info('installing ' + r.magenta + ' to ' + (process.cwd() + '/' + r).grey);
-
-    //
-    // Perform a sync directory copy from node_modules folder to CWD
-    //
-    helper.copyDir(p, process.cwd() + '/resources/' + r);
-
-    //
-    // Copy the contents of  /resources/theresource/ to $CWD/resources/theresource
-    //
-    result = require(p);
-
-  }
-
-  return result;
-};
 
 resource.define = function (name, options) {
 
