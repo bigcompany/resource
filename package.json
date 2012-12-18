@@ -7,7 +7,8 @@
     "eventemitter2": "*",
     "node-uuid": "*",
     "colors": "*",
-    "resources": "*"
+    "resources": "*",
+    "mkdirp": "~0.3.4"
   },
   "scripts": {
     "test": "tap test/"
