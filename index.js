@@ -177,12 +177,12 @@ resource.installDeps = function (r) {
     //
     // Check to see if the dep is available
     //
-    resourcePath = process.cwd() + '/node_modules/';
+    resourcePath = helper.appDir + '/node_modules/';
     resourcePath += dep;
     try {
       require.resolve(resourcePath);
-      //console.log('using dependency:', dep);
     } catch (err) {
+      
       logger.warn(r.name.magenta + ' resource is missing a required dependency: ' + dep.yellow)
       // TODO: check to see if dep is already in the process of being installed,
       // if so, don't attempt to install it twice
@@ -191,6 +191,7 @@ resource.installDeps = function (r) {
         _command.push(dep + '@' + r.dependencies[dep]);
       }
     }
+
   });
 
   if(_command.length === 1) {
@@ -225,6 +226,7 @@ resource.installDeps = function (r) {
   });
 
   npm.on('exit', function (code) {
+    console.log('npm just installed', r.name);
     _command.forEach(function(c, i){
       if(i !== 0) { // the first command is "install"
         var dep = c.split('@'); // split the dep name based on packagename@semver syntax
