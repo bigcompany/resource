@@ -6,13 +6,13 @@ var tap = require("tap")
 
 test("load resource module", function (t) {
   resource = require('../');
-  t.ok(true, "object loaded")
+  t.ok(resource, "object loaded")
   t.end()
 });
 
 test("define creature resource", function (t) {
   creature = resource.define('creature');
-  t.ok(true, "creature resource defined")
+  t.ok(creature, "creature resource defined")
   t.end()
 });
 
@@ -21,11 +21,10 @@ test("define method on creature - with no schema - invoke with string argument",
     return text;
   });
   resource.once('creature::talk', function(data){
-    t.equal('hi', data);
-    t.ok(true, 'talked!')
+    t.equal('hi', data, 'creature::talk fired - data == "hi"');
     t.end()
   });
-  t.equal('hi', creature.talk('hi'));
+  t.equal('hi', creature.talk('hi'), 'creature.talk returned - result == "hi"');
 });
 
 
@@ -40,11 +39,10 @@ test("define method on creature - with schema - single text argument", function 
     }
   });
   resource.once('creature::talk', function(data){
-    t.equal('hi', data);
-    t.ok(true, 'talked!')
+    t.equal('hi', data, 'creature::talk fired - data == "hi"');
     t.end()
   });
-  t.equal('hi', creature.talk('hi'));
+  t.equal('hi', creature.talk('hi'), 'creature.talk returned - result == "hi"');
 });
 
 test("define method on creature - with no schema - invoke with string argument and callback", function (t) {
@@ -52,13 +50,12 @@ test("define method on creature - with no schema - invoke with string argument a
     callback(null, text);
   });
   resource.once('creature::talk', function(data){
-    t.equal('hi', data);
-    t.ok(true, 'talked!')
+    t.equal('hi', data, 'creature::talk fired - data == "hi"');
     t.end()
   });
   creature.talk('hi', function(err, result){
-    t.type(err, "null");
-    t.equal(result, 'hi');
+    t.type(err, "null", 'callback fired - no error');
+    t.equal(result, 'hi', 'callback fired - result == "hi"');
   });
 });
 
@@ -73,9 +70,8 @@ test("define method on creature - with schema - invoke with text argument and ca
     }
   });
   resource.once('creature::talk', function(data){
-    t.equal('hi', data);
-    t.ok(true, 'talked!')
+    t.equal('hi', data, 'creature::talk fired');
     t.end()
   });
-  t.equal('hi', creature.talk('hi'));
+  t.equal('hi', creature.talk('hi'), 'creature.talk returned - result == "hi"');
 });

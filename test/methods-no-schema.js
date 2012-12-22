@@ -11,14 +11,13 @@ var tap = require("tap")
 
 test("load resource module", function (t) {
   resource = require('../');
-  t.ok(true, "object loaded")
-  var colors = require('colors');
+  t.ok(resource, "object loaded")
   t.end()
 });
 
 test("define creature resource", function (t) {
   creature = resource.define('creature');
-  t.ok(true, "creature resource defined")
+  t.ok(creature, "creature resource defined")
   t.end()
 });
 
@@ -26,8 +25,7 @@ test("define method on creature - with no schema - invoke with no args", functio
   creature.method('poke', function() {
     return 'poked';
   });
-  t.equal('poked', creature.poke());
-  t.ok(true, 'poked!')
+  t.equal('poked', creature.poke(), 'poked!');
   t.end()
 });
 
@@ -36,8 +34,7 @@ test("define method on creature - with no schema - invoke with callback", functi
     callback(null, 'poked');
   });
   creature.poke(function(err, result){
-    t.equal('poked', result);
-    t.ok(true, 'poked!')
+    t.equal('poked', result, 'poked!');
     t.end()
   });
 });
@@ -46,8 +43,7 @@ test("define method on creature - with no schema - invoke with string argument",
   creature.method('talk', function(text){
     return text;
   });
-  t.equal('hi', creature.talk('hi'));
-  t.ok(true, 'talked!')
+  t.equal('hi', creature.talk('hi'), 'talked!');
   t.end()
 });
 
@@ -55,8 +51,7 @@ test("define method on creature - with no schema - invoke with two string argume
   creature.method('talk', function(text, person){
     return text + ':' + person;
   }, {});
-  t.equal('hi:marak', creature.talk('hi', 'marak'));
-  t.ok(true, 'talked!')
+  t.equal('hi:marak', creature.talk('hi', 'marak'), 'talked!');
   t.end()
 });
 
@@ -65,7 +60,7 @@ test("define method on creature - with no schema - invoke with string and callba
     callback(null, text);
   });
   creature.talk('hi', function(err, result){
-    t.equal('hi', result);
+    t.equal('hi', result, 'talked!');
     t.end()
   });
 });
@@ -75,8 +70,8 @@ test("define method on creature - with no schema - invoke with options", functio
     return options;
   });
   var result = creature.talk({ "at": "bobby", "when": "now" });
-  t.equal(result.at, 'bobby');
-  t.equal(result.when, 'now');
+  t.equal(result.at, 'bobby', 'talked! - result.at == "bobby"');
+  t.equal(result.when, 'now', 'talked! - result.when == "now"');
   t.end()
 });
 
@@ -85,8 +80,8 @@ test("define method on creature - with no schema - invoke with options and callb
     callback(null, options);
   });
   creature.talk({ "at": "bobby", "when": "now" }, function(err, result){
-    t.equal(result.at, 'bobby');
-    t.equal(result.when, 'now');
+    t.equal(result.at, 'bobby', 'talked! - result.at == "bobby"');
+    t.equal(result.when, 'now', 'talked! - result.when == "now"');
     t.end()
   });
 });

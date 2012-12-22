@@ -6,13 +6,13 @@ var tap = require("tap")
 
 test("load resource module", function (t) {
   resource = require('../');
-  t.ok(true, "object loaded")
+  t.ok(resource, "object loaded")
   t.end()
 });
 
 test("define creature resource", function (t) {
   creature = resource.define('creature');
-  t.ok(true, "creature resource defined")
+  t.ok(creature, "creature resource defined")
   t.end()
 });
 
@@ -35,8 +35,7 @@ test("define method on creature - with schema - single text argument", function 
       }
     }
   });
-  t.equal('hi', creature.talk('hi'));
-  t.ok(true, 'talked!')
+  t.equal(creature.talk('hi'), 'hi', 'talked!');
   t.end()
 });
 
@@ -52,10 +51,9 @@ test("define method on creature - with schema - and single text argument - with 
   });
   var result;
   result = creature.talk(123);
-  t.equal('type', result[0].attribute);
-  t.equal('text', result[0].property);
-  t.equal('number', result[0].actual);
-  t.ok(true, 'did not talk!');
+  t.equal(result[0].attribute, 'type', 'did not talk - result[0].attribute == "type"');
+  t.equal(result[0].property, 'text', 'did not talk - result[0].attribute == "text"');
+  t.equal(result[0].actual, 'number', 'did not talk - result[0].actual == "number"');
   t.end()
 });
 
@@ -72,8 +70,7 @@ test("define method on creature - with schema - and two text arguments", functio
       }
     }
   });
-  t.equal('hi:marak', creature.talk('hi', 'marak'));
-  t.ok(true, 'talked!')
+  t.equal(creature.talk('hi', 'marak'), 'hi:marak', 'talked!');
   t.end()
 });
 
@@ -88,8 +85,7 @@ test("define method on creature - with schema - and one callback argument", func
     }
   });
   creature.poke(function(err, result){
-    t.equal('poked!', result);
-    t.ok(true, 'poked!')
+    t.equal(result, 'poked!', 'poked!');
     t.end()
   });
 });
@@ -108,8 +104,7 @@ test("define method on creature - with schema - and two arguments - text, callba
     }
   });
   creature.talk('hi!', function(err, result){
-    t.equal('hi!', result);
-    t.ok(true, 'talked!')
+    t.equal(result, 'hi!', 'talked!');
     t.end()
   });
 });
@@ -128,10 +123,9 @@ test("define method on creature - with schema - and two arguments - text, callba
     }
   });
   creature.talk(123, function(err, result){
-    t.equal('type', err.errors[0].attribute);
-    t.equal('text', err.errors[0].property);
-    t.equal('number', err.errors[0].actual);
-    t.ok(true, 'did not talk!');
+    t.equal(err.errors[0].attribute, 'type', 'did not talk - err.errors[0].attribute == "type"');
+    t.equal(err.errors[0].property, 'text', 'did not talk - err.errors[0].attribute == "text"');
+    t.equal(err.errors[0].actual, 'number', 'did not talk - err.errors[0].actual == "number"');
     t.end()
   });
 });
@@ -158,9 +152,8 @@ test("define method on creature - with schema - and two arguments - options, cal
     }
   });
   creature.fire({ "direction": "up", "power": "HIGH" }, function(err, result){
-    t.equal('up', result.direction);
-    t.equal('HIGH', result.power);
-    t.ok(true, 'fired!')
+    t.equal(result.direction, 'up', 'fired! - result.direction == "up"');
+    t.equal(result.power, 'HIGH', 'fired! - result.power == "HIGH"');
     t.end()
   });
 });
@@ -180,8 +173,7 @@ test("define method on creature - with number schema - and good input", function
     }
   });
   creature.hit(8999, function(err, result){
-    t.equal(result, 9000);
-    t.ok(true, 'hit for 9000!');
+    t.equal(result, 9000, 'hit for 9000!');
     t.end()
   });
 });
@@ -201,9 +193,9 @@ test("define method on creature - with number schema - and bad input", function 
     }
   });
   creature.hit("abc", function(err, result){
-    t.equal('type', err.errors[0].attribute);
-    t.equal('damage', err.errors[0].property);
-    t.equal('string', err.errors[0].actual);
+    t.equal(err.errors[0].attribute, 'type', 'did not hit - err.errors[0].attribute = "type"');
+    t.equal(err.errors[0].property, 'damage', 'did not hit - err.errors[0].property = "damage"');
+    t.equal(err.errors[0].actual, 'string', 'did not hit - err.errors[0].actual = "string"');
     t.end()
   });
 });
@@ -223,14 +215,13 @@ test("define method on creature - with required string schema - and bad input", 
     }
   });
   creature.hit("", function(err, result){
-    t.equal('required', err.errors[0].attribute);
-    t.equal('target', err.errors[0].property);
-    t.equal('', err.errors[0].actual);
+    t.equal(err.errors[0].attribute, 'required', 'did not hit - err.errors[0].attribute = "required"');
+    t.equal(err.errors[0].property, 'target', 'did not hit - err.errors[0].property = "target"');
+    t.equal(err.errors[0].actual, '', 'did not hit - err.errors[0].actual = ""');
     t.end()
   });
 });
 
-/*
 test("define method on creature - with simple schema - and additional non-schema arguments", function (t) {
   creature.method('talk', function (text, target){
     return { text: text, target: target };
@@ -242,14 +233,11 @@ test("define method on creature - with simple schema - and additional non-schema
     }
   });
   var result = creature.talk('hi', 'bob');
-  t.equal('hi', result.text);
-  t.equal('bob', result.target);
-  t.ok(true, 'talked!')
+  t.equal(result.text, 'hi', 'talked! - result.text == "hi"');
+  t.equal(result.target, 'bob', 'talked! - result.target == "bob"');
   t.end()
 });
 
-*/
-/*
 test("define method on creature - with object schema - and additional non-schema arguments", function (t) {
   creature.method('talk', function (options, callback) {
     callback(null, options);
@@ -258,18 +246,16 @@ test("define method on creature - with object schema - and additional non-schema
       "options": {
         "type": "object",
         "properties": {
-          "message" : {
+          "text" : {
             "type": "string"
           }
         }
       }
     }
   });
-  creature.talk({ message: 'hi' }, function(err, result) {
-    t.equal('hi', result.text);
-    t.equal('bob', result.target);
-    t.ok(true, 'talked!')
+  creature.talk({ text: 'hi', target: 'bob' }, function(err, result) {
+    t.equal(result.text, 'hi', 'talked! - result.text == "hi"');
+    t.equal(result.target, 'bob', 'talked! - result.target == "bob"');
     t.end()
   });
 });
-*/

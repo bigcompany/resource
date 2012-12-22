@@ -6,7 +6,7 @@ var tap = require("tap")
 
 test("load resource module", function (t) {
   resource = require('../');
-  t.ok(resource, "object loaded")
+  t.ok(resource, "resource loaded")
   t.end()
 });
 
@@ -18,10 +18,10 @@ test("define creature resource", function (t) {
 
 test("define property on creature - with no schema", function (t) {
   creature.property('name'); // should default to string
-  t.type(creature.schema, 'object', 'creature.schema should be an object');
-  t.type(creature.schema.properties, 'object', 'creature.schema.properties should be an object');
-  t.type(creature.schema.properties.name, 'object', 'creature.schema.properties.name should be an object');
-  t.type(creature.schema.properties.name.type, 'string', 'creature.schema.properties.name.type should be of type any');
+  t.type(creature.schema, 'object', 'property defined - schema should be an object');
+  t.type(creature.schema.properties, 'object', 'property defined - schema.properties is object');
+  t.type(creature.schema.properties.name, 'object', 'property defined - schema.properties.name is object');
+  t.type(creature.schema.properties.name.type, 'string', 'property defined - schema.properties.name.type is string');
   t.end()
 });
 
@@ -29,8 +29,8 @@ test("define property on creature - with schema", function (t) {
   creature.property('title', {
     "type": "string"
   });
-  t.type(creature.schema.properties.title, 'object', 'creature.schema.properties.title should be an object');
-  t.equal(creature.schema.properties.title.type, 'string');
+  t.type(creature.schema.properties.title, 'object', 'property defined - schema.properties.title is object');
+  t.equal(creature.schema.properties.title.type, 'string', 'property defined - schema.properties.title.type is string');
   t.end();
 });
 
@@ -38,7 +38,6 @@ test("define array property on creature", function (t) {
   creature.property('friends', {
     "type": "array"
   });
-  t.equal(creature.schema.properties.friends.type, 'array');
+  t.equal(creature.schema.properties.friends.type, 'array', 'property defined - schema.properties.friends.type is array');
   t.end();
 });
-
