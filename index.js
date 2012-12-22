@@ -437,22 +437,43 @@ function addMethod (r, name, method, schema, tap) {
       // make sure to add back those additional arguments
       //
 
-        /*
+      Object.keys(_instance).forEach(function(item){
+        if(item !== 'callback') {
+          _args.push(_instance[item]);
+        }
+      });
+
+      if (typeof schema.properties === "undefined" || typeof schema.properties.options === "undefined") {
         //
-        // If the amount of args passed in, exceeds the amount of expected args, but not overwrite default optional args
+        // If an options object is not defined in the schema and the amount of incoming arguments exceeds,
+        // the amount of expected arguments then push the additional arguments
         //
         if (args.length > _args.length) {
           for (var i = _args.length; i < args.length; i++) {
             _args.push(args[i]);
           }
         }
-        */
+      }
+      else if (typeof schema.properties.options === "object" && typeof args[0] === 'object' && typeof _args[0] === 'object') {
+        //
+        // If an options object is defined in the schema, merge the additional arguments,
+        // into the options object
 
-      Object.keys(_instance).forEach(function(item){
-        if(item !== 'callback') {
-          _args.push(_instance[item]);
-        }
-      });
+        //
+        // `options` corresponds to the first argument in each of these arrays.
+        //
+        var keys = Object.keys(args[0]),
+            _keys = Object.keys(_args[0]);
+
+        //
+        // Merge the additional options arguments with the original options arguments
+        //
+        Object.keys(args[0]).forEach(function (k, i) {
+          if (!_args[0][k]) {
+            _args[0][k] = args[0][k];
+          }
+        });
+      }
 
       //
       // Check to see if a callback was expected, but not provided.
