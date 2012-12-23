@@ -57,6 +57,36 @@ test("define method on creature - with schema - and single text argument - with 
   t.end()
 });
 
+test("define method on creature - with schema - single text argument - with default", function (t) {
+  creature.method('talk', function(text){
+    return text;
+  }, {
+    "properties": {
+      "text" : {
+        "type": "string",
+        "default": "hello"
+      }
+    }
+  });
+  t.equal(creature.talk('hi'), 'hi', 'talked!');
+  t.end()
+});
+
+test("define method on creature - with schema - and single text argument - with default - and no input", function (t) {
+  creature.method('talk', function(text){
+    return text;
+  }, {
+    "properties": {
+      "text" : {
+        "type": "string",
+        "default": "hello"
+      }
+    }
+  });
+  t.equal(creature.talk(), 'hello', 'talked!');
+  t.end()
+});
+
 test("define method on creature - with schema - and two text arguments", function (t) {
   creature.method('talk', function(text, person){
     return text + ':' + person;
@@ -71,6 +101,38 @@ test("define method on creature - with schema - and two text arguments", functio
     }
   });
   t.equal(creature.talk('hi', 'marak'), 'hi:marak', 'talked!');
+  t.end()
+});
+
+test("define method on creature - with schema - and single boolean argument", function (t) {
+  creature.method('talk', function(mute){
+    return mute ? '' : 'hi';
+  }, {
+    "properties": {
+      "mute" : {
+        "type": "boolean"
+      }
+    }
+  });
+  t.equal(creature.talk(false), 'hi', 'talked!');
+  t.end()
+});
+
+test("define method on creature - with schema - and single boolean argument - with bad input", function (t) {
+  creature.method('talk', function(mute){
+    return mute ? '' : 'hi';
+  }, {
+    "properties": {
+      "mute" : {
+        "type": "boolean"
+      }
+    }
+  });
+  var result;
+  result = creature.talk('hello');
+  t.equal(result[0].attribute, 'type', 'did not talk - result[0].attribute == "type"');
+  t.equal(result[0].property, 'mute', 'did not talk - result[0].attribute == "mute"');
+  t.equal(result[0].actual, 'string', 'did not talk - result[0].actual == "string"');
   t.end()
 });
 
@@ -143,6 +205,10 @@ test("define method on creature - with schema - and two arguments - options, cal
           },
           "power": {
             "type": "string"
+          },
+          "stun": {
+            "type": "boolean",
+            "default": false
           }
         }
       },
@@ -154,6 +220,7 @@ test("define method on creature - with schema - and two arguments - options, cal
   creature.fire({ "direction": "up", "power": "HIGH" }, function(err, result){
     t.equal(result.direction, 'up', 'fired! - result.direction == "up"');
     t.equal(result.power, 'HIGH', 'fired! - result.power == "HIGH"');
+    t.equal(result.stun, false, 'fired! - result.stun == false');
     t.end()
   });
 });
