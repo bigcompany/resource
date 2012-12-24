@@ -37,7 +37,7 @@ test("adding a module-scoped Resource.beforeAll(fn)", function (t) {
 });
 
 test("adding creature.before('create')", function (t) {
-  t.equal(creature.create._before.length, 0);
+  t.equal(creature.create._before.length, 0, 'no before hooks yet on creature');
   creature.before('create', function (data, next) {
     data.id = "larry";
     next(null, data);
@@ -164,6 +164,89 @@ test("adding another creature.after('create')", function (t) {
     t.type(err, "null", 'callback fired - no error');
     t.end();
   });
+});
+
+test("define vehicle resource - with datasource config - and before and after hooks added on same tick", function (t) {
+  vehicle = resource.define('vehicle', { config: { datasource: 'memory' }});
+  vehicle.property('fuel', {
+    "type": "number",
+    "default": 0
+  });
+  vehicle.before('create', function (data, next) {
+    data.id = "#99";
+    next(null, data);
+  });
+  vehicle.after('create', function (data, next) {
+    data.fuel = 100;
+    //next(null, data);
+  });
+  t.equal(vehicle.create.before.length, 1);
+  vehicle.create({ id: '#88' }, function(err, result){
+    t.type(err, "null", 'vehicle create hooks applied - no error');
+    t.equal(result.id, '#99', 'vehicle.before("create") applied - result.id == "#99"');
+    t.equal(result.fuel, 100, 'vehicle.after("create") applied - result.fuel == 100');
+    t.end();
+  });
+});
+
+test("define vehicle resource - with datasource config - and before and after hooks added on same tick", function (t) {
+  var vehicle = resource.define('vehicle', { config: { datasource: 'memory' }});
+  vehicle.property('fuel', {
+    "type": "number",
+    "default": 0
+  });
+  vehicle.before('create', function (data, next) {
+    data.id = "#99";
+    next(null, data);
+  });
+  vehicle.after('create', function (data, next) {
+    data.fuel = 100;
+    //next(null, data);
+  });
+  t.equal(vehicle.create.before.length, 1);
+  vehicle.create({ id: '#88' }, function(err, result){
+    t.type(err, "null", 'vehicle create hooks applied - no error');
+    t.equal(result.id, '#99', 'vehicle.before("create") applied - result.id == "#99"');
+    t.equal(result.fuel, 100, 'vehicle.after("create") applied - result.fuel == 100');
+    t.end();
+  });
+});
+
+test("define clock resource - with datasource config - and asynchronous before hooks - called twice asynchronously", function (t) {
+  var clock = resource.define('click', { config: { datasource: 'memory' }});
+
+  var clicks = {};
+
+  t.plan(5);
+  
+  clock.before('create', function (data, next) {
+    setTimeout(function () {
+      clicks[data.id] = clicks[data.id] || [];
+      clicks[data.id].push("tick");
+      next(null, data);
+    }, 500);
+  });
+
+  clock.before('create', function (data, next) {
+    setTimeout(function () {
+      clicks[data.id] = clicks[data.id] || [];
+      clicks[data.id].push("tock");
+      next(null, data);
+    }, 500);
+  });
+
+  t.equal(clock.create.before.length, 2);
+  clock.create({ id: 'foo' }, function(err, result){
+    t.type(err, "null", 'clock create hooks applied - no error');
+    t.similar(clicks.foo, ['tick', 'tock' ], 'clock.before("create") hooks applied - clicks.foo is ["tick", "tock"]');
+  });
+
+  setTimeout(function () {
+    clock.create({ id: 'bar' }, function(err, result){
+      t.type(err, "null", 'clock create hooks applied - no error');
+      t.similar(clicks.bar, ['tick', 'tock' ], 'clock.before("create") hooks applied - clicks.bar is ["tick", "tock"]');
+    });
+  }, 250);
 });
 
 // TODO: add after hooks for sync methods
