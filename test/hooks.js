@@ -245,3 +245,35 @@ test("define clock resource - with datasource config - and asynchronous before h
     });
   }, 250);
 });
+
+test("adding another creature.after('create')", function (t) {
+  t.equal(creature.create.after.length, 2);
+
+  creature.after('create', function (data, next) {
+    data.life = 999;
+    next(null, data);
+  });
+
+  t.equal(creature.create.after.length, 3);
+
+  creature.after('create', function (data, next) {
+    //
+    // Remark: To modify .id requires creating a new object
+    // TODO: look into JugglingDB adapter to determine why
+    //
+    var obj = {};
+    Object.keys(data).forEach(function (prop) {
+      obj[prop] = data[prop];
+    });
+    obj.id = "bobby";
+    next(null, obj);
+  });
+
+  creature.create({ id: 'jimmy', life: 1 }, function (err, data){
+    t.equal(data.id, 'bobby', 'added second after hook - data.id == "bobby"');
+    t.equal(data.life, 999, 'data.life == 999');
+
+    t.type(err, "null", 'callback fired - no error');
+    t.end();
+  });
+});
