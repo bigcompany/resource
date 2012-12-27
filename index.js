@@ -591,6 +591,7 @@ function addMethod (r, name, method, schema, tap) {
 
           //
           // Resource.after() hooks will NOT be executed if an error has occured on the event the hook is attached to
+          //
           return afterHooks(argv, function (err, argv) {
             if (err) {
               throw err;
@@ -619,15 +620,14 @@ function addMethod (r, name, method, schema, tap) {
     }
 
     //
-    // Check for after hooks, execute FIFO
-    function afterHooks(args, cb) {
+    // Executes "after" hooks in FIFO (First-In-First-Out) Order
+    //
+    function afterHooks (args, cb) {
       var hooks;
-
       if (Array.isArray(fn.after) && fn.after.length > 0) {
         hooks = fn.after.slice();
         function iter() {
           var hook = hooks.shift();
-
           hook(args[1], function (err, data) {
             if (err) {
               return cb(err);
