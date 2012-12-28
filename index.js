@@ -677,6 +677,11 @@ function addMethod (r, name, method, schema, tap) {
         fn.before.push(b);
       });
     }
+    if (Array.isArray(r.methods[name].after)){
+      r.methods[name].after.forEach(function(b){
+        fn.after.push(b);
+      });
+    }
   }
 
   //
