@@ -4,6 +4,11 @@ var tap = require("tap")
   , creature
   , resource;
 
+//
+// Testing metadata
+//
+var testDatasource = "memory";
+
 test("load resource module", function (t) {
   resource = require('../');
   t.ok(resource, "object loaded")
@@ -11,14 +16,22 @@ test("load resource module", function (t) {
 });
 
 test("define creature resource - with datasource config", function (t) {
-  creature = resource.define('creature', { config: { datasource: 'memory' }});
+  creature = resource.define('creature', { config: { datasource: testDatasource }});
 
   creature.property('life', {
     "type": "number"
   });
 
+  creature.property('metadata', {
+    "type": "object"
+  });
+
+  creature.property('items', {
+    "type": "array"
+  });
+
   t.type(creature.config, 'object', 'configuration defined - creature.config is object');
-  t.equal('memory', creature.config.datasource, 'configuration defined - creature.config.datasource == "memory"');
+  t.equal(testDatasource, creature.config.datasource, ('configuration defined - creature.config.datasource == "' + testDatasource + '"'));
 
   t.type(creature.methods, 'object', 'methods defined - creature.methods is object');
   t.type(creature.methods.create, 'function', 'methods defined - methods.create is function');
@@ -34,6 +47,18 @@ test("define creature resource - with datasource config", function (t) {
   t.end()
 });
 
+//
+// A simple data object to use for testing resource properties of type "object"
+//
+var data = {
+  "foo": "bar",
+  "abc": 123
+},
+items = [
+  { "foo": "bar" },
+  { "abc": 123 }
+];
+
 test("executing creature.all", function (t) {
   creature.all(function(err, result){
     t.equal(result.length, 0, 'no creatures');
@@ -42,9 +67,19 @@ test("executing creature.all", function (t) {
 });
 
 test("executing creature.create", function (t) {
-  creature.create({ id: 'bobby' }, function(err, result){
+  creature.create({
+    id: 'bobby',
+    metadata: data,
+    items: items // array property current has serialization issue
+  }, function(err, result){
     t.type(err, 'null', 'no error');
     t.type(result, 'object', 'result is object');
+    t.equal(result.id, 'bobby', 'id is correct');
+    t.type(result.metadata, 'object', 'metadata is object');
+    //
+    // TODO: fix serialization issue with array property type
+    //
+    // t.equal(Array.isArray(result.data), true, 'items is array');
     t.end();
   });
 });
@@ -58,7 +93,7 @@ test("executing creature.get", function (t) {
 });
 
 test("executing creature.all", function (t) {
-  creature.all(function(err, result){
+  creature.all(function(err, result) {
     t.equal(result.length, 1, 'one creature');
     t.end();
   });
