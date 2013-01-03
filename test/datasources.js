@@ -76,6 +76,8 @@ test("executing creature.create", function (t) {
     t.type(result, 'object', 'result is object');
     t.equal(result.id, 'bobby', 'id is correct');
     t.type(result.metadata, 'object', 'metadata is object');
+    t.equal(result.metadata.foo, 'bar');
+    t.equal(result.metadata.abc, 123);
     //
     // TODO: fix serialization issue with array property type
     //
@@ -88,6 +90,9 @@ test("executing creature.get", function (t) {
   creature.get('bobby', function(err, result){
     t.type(err, 'null', 'no error');
     t.type(result, 'object', 'result is object');
+    t.type(result.metadata, 'object', 'metadata is object');
+    t.equal(result.metadata.foo, 'bar');
+    t.equal(result.metadata.abc, 123);
     t.end();
   });
 });
