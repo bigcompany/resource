@@ -129,9 +129,9 @@ test("adding creature.before('poke') and creature.after('poke') - before creatur
   creature.method('poke', function(data, callback){
     callback(null, data);
   });
-  creature.poke('poked!', function (err, data) {
+  creature.poke('poked', function (err, data) {
     t.ok(!err, 'poked! - no error');
-    t.equal('poked!', data, 'poked! - result is "poked!"');
+    t.equal(data, 'poked!', 'poked! - result is "poked!"');
     t.end();
   });
 });
