@@ -152,6 +152,24 @@ test("define method on creature - with schema - and one callback argument", func
   });
 });
 
+test("define method on creature - with schema - and one callback argument with multiple arguments", function (t) {
+  creature.method('poke', function(callback){
+    return callback(null, 'poked!', 'second poke');
+  }, {
+    "properties": {
+      "callback": {
+        "type": "function"
+      }
+    }
+  });
+  creature.poke(function(err, first_result, second_result){
+    t.equal('poked!', first_result);
+    t.equal('second poke', second_result);
+    t.ok(true, 'poked!')
+    t.end()
+  });
+});
+
 test("define method on creature - with schema - and two arguments - text, callback", function (t) {
   creature.method('talk', function(text, callback){
     return callback(null, text);
