@@ -1,0 +1,5 @@
+This /db/ directory represents the default storage path for the `fs` datasource.
+
+Folders inside /db/ represent resources. Each resource folder will then contain instances of itself as .json files.
+
+see: `examples/persistence.js`
