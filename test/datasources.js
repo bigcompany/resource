@@ -52,7 +52,11 @@ test("define creature resource - with datasource config", function (t) {
 //
 var data = {
   "foo": "bar",
-  "abc": 123
+  "abc": 123,
+  "data" : {
+    "prop1" : "foo",
+    "prop2" : "bar"
+  }
 },
 items = [
   { "foo": "bar" },
@@ -78,6 +82,9 @@ test("executing creature.create", function (t) {
     t.type(result.metadata, 'object', 'metadata is object');
     t.equal(result.metadata.foo, 'bar');
     t.equal(result.metadata.abc, 123);
+    t.equal(result.metadata.data.prop1, 'foo');
+    t.equal(result.metadata.data.prop2, 'bar');
+
     //
     // TODO: fix serialization issue with array property type
     //
@@ -93,6 +100,8 @@ test("executing creature.get", function (t) {
     t.type(result.metadata, 'object', 'metadata is object');
     t.equal(result.metadata.foo, 'bar');
     t.equal(result.metadata.abc, 123);
+    t.equal(result.metadata.data.prop1, 'foo');
+    t.equal(result.metadata.data.prop2, 'bar');
     t.end();
   });
 });
