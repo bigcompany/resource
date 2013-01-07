@@ -125,6 +125,20 @@ resource.define = function (name, options) {
     persistence.enable(r, r.config.datasource);
   }
 
+  //
+  // TODO: add resource level beforeAll() hooks
+  //
+  // r.beforeAll = function (callback) {};
+
+  //
+  // Give the resource a persist() method as a short-cut to resource.persistence.enable
+  //
+  r.persist = function (datasource) {
+    datasource = datasource || 'memory';
+    r.config.datasource = datasource;
+    persistence.enable(r, { datasource: datasource });
+  };
+
 
   //
   // Attach a copy of the resource to the resources scope ( for later reference )
@@ -322,7 +336,7 @@ function addMethod (r, name, method, schema, tap) {
     // Check for any beforeAll hooks,
     // if they exist, execute them in LIFO order
     //
-    function beforeAllHooks(cb) {
+    function beforeAllHooks (cb) {
       var hooks;
       if (Array.isArray(resource.before) && resource.before.length > 0) {
         hooks = resource.before.slice();
