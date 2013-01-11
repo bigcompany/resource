@@ -185,6 +185,7 @@ resource.installDeps = function (r) {
     //
     resourcePath = helper.appDir + '/node_modules/';
     resourcePath += dep;
+    resourcePath = require('path').normalize(resourcePath);
     try {
       require.resolve(resourcePath);
     } catch (err) {
@@ -215,8 +216,15 @@ resource.installDeps = function (r) {
   logger.warn('spawning ' + 'npm'.grey + ' to install missing dependencies')
   logger.exec('npm ' + _command.join(' '));
 
+  //
+  // Cross-platform npm binary detection using `which` module
+  // ( this is required for Windows )
+  //
+  var which = require('which'),
+      npmBinary = which.sync('npm');
+
   var spawn = require('child_process').spawn,
-      npm    = spawn('npm', _command, { cwd: process.cwd() });
+      npm   = spawn(npmBinary, _command, { cwd: process.cwd() });
 
   npm.stdout.on('data', function (data) {
     process.stdout.write(data);
