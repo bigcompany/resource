@@ -109,57 +109,30 @@
   }});
 ```
 
-## Using resource hooks
-
-### resource.before()
-### resource.after()
+## Using resource.before() and resource.after() hooks
 
 ```js
-  var resource = require('../'),
-      creature = resource.define('creature');
+var resource = require('../'),
+    creature = resource.define('creature');
 
-  creature.persist('memory');
+creature.persist('memory');
 
-  creature.before('create', function (data, next) {
-    console.log('before creature.create')
-    data.id += '-a';
-    next(null, data)
-  });
+creature.before('create', function (data, next) {
+  console.log('before creature.create')
+  data.id += '-a';
+  next(null, data)
+});
 
-  creature.after('create', function (data, next) {
-    console.log('after creature.create')
-    data.foo = "bar";
-    next(null, data);
-  });
+creature.after('create', function (data, next) {
+  console.log('after creature.create')
+  data.foo = "bar";
+  next(null, data);
+});
 
-  creature.create({ id: 'bobby' }, function (err, result) {
-    console.log(err, result);
-    // OUTPUTS: null { id: 'bobby-a', foo: 'bar' }
-  });
-```
-
-## Use resources in your application
-
-```js
-  exports.creature = creature;
-```
-
-```js
-  //
-  // Using the built-in resource loading system,
-  // this gives finer grained controls for deferred dependencies
-  //
-  var resource = require('resource'),
-  creature = resource.use('creature');
-```
-
-```js
-  //
-  // Using node's built-in require(),
-  // it's preferred to use resource.use('creature') over require('./creature'),
-  //
-  var resource = require('resource),
-  creature = require('./creature');
+creature.create({ id: 'bobby' }, function (err, result) {
+  console.log(err, result);
+  // OUTPUTS: null { id: 'bobby-a', foo: 'bar' }
+});
 ```
 
 ## Setting NPM Dependencies in a resource
@@ -167,9 +140,33 @@
 Uses same syntax as npm package.json
 
 ```js
-
-  exports.dependencies = {
-    "colors": "*"
-  };
-
+exports.dependencies = {
+  "colors": "*"
+};
 ```
+
+## Use resources in an application
+
+`resource.use` intelligently loads resources and can lazily install required dependencies while deferring resource method invocation.
+
+```js
+//
+// resource.use() is the preferred way to load resources
+//
+var resource = require('resource'),
+creature = resource.use('creature');
+```
+
+```js
+//
+// node's built-in require() will also work,
+// but is not preferred over resource.use()
+//
+var resource = require('resource'),
+creature = require('./creature');
+```
+
+
+## Additional Resources
+
+Additional resources are available at https://github.com/bigcompany/resources
