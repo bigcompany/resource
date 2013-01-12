@@ -798,6 +798,8 @@ resource.schema = {
     resource.logger[level] = logger[level];
   }
 
+  resource.logger.put = logger.put;
+
 //
 // end logger resource
 //
