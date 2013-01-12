@@ -91,8 +91,8 @@ resource.define = function (name, options) {
     // If no method exists on the resource yet create a place holder,
     // in order to be able to lazily define hooks on methods that dont exist yet
     //
-    if(typeof r.methods[method] !== 'function') {
-      r.methods[method] = function () {};
+    if(typeof r.methods[method] === 'undefined') {
+      r.methods[method] = {};
       r.methods[method].before = [];
       r.methods[method].after = [];
     }
@@ -107,8 +107,8 @@ resource.define = function (name, options) {
     // If no method exists on the resource yet create a place holder,
     // in order to be able to lazily define hooks on methods that dont exist yet
     //
-    if(typeof r.methods[method] !== 'function') {
-      r.methods[method] = function () {};
+    if(typeof r.methods[method] === 'undefined') {
+      r.methods[method] = {};
       r.methods[method].before = [];
       r.methods[method].after = [];
     }
