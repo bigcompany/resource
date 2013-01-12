@@ -614,11 +614,11 @@ function addMethod (r, name, method, schema, tap) {
           //
           // Resource.after() hooks will NOT be executed if an error has occured on the event the hook is attached to
           //
-          return afterHooks(argv, function (err, argv) {
+          return afterHooks(argv, function (err, data) {
             if (err) {
               throw err;
             }
-            return callback.apply(this, argv);
+            return callback.apply(this, data);
           });
         }
         else {
