@@ -583,8 +583,8 @@ function addMethod (r, name, method, schema, tap) {
           //
           // Add the wrapped callback as the last argument
           //
-          _args.push(function(err, result){
-            return callbackWrap(err, result);
+          _args.push(function () {
+            return callbackWrap.apply(this, arguments);
           });
         }
       } else {
@@ -593,8 +593,8 @@ function addMethod (r, name, method, schema, tap) {
           //
           // Replace the original callback with the new wrapped callback
           //
-          _args[_args.length -1] = function(err, result){
-            return callbackWrap(err, result);
+          _args[_args.length -1] = function (err, result) {
+            return callbackWrap.apply(this, arguments);
           };
         }
       }
