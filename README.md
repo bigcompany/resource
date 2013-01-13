@@ -168,10 +168,8 @@ creature = resource.use('creature');
 // node's built-in require() will also work,
 // but is not preferred over resource.use()
 //
-var resource = require('resource'),
-creature = require('./creature');
+var creature = require('./creature');
 ```
-
 
 ## Additional Resources
 
