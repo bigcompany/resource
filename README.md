@@ -177,6 +177,6 @@ Additional resources are available at https://github.com/bigcompany/resources
 
 ## Tests
 
-```bash
-tap test
+```
+npm test
 ```
