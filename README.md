@@ -134,10 +134,12 @@ creature.create({ id: 'bobby' }, function (err, result) {
 
 ## Exporting a resource in a module
 
+```js
 var resource = require('../'),
     creature = resource.define('creature');
 
 exports.creature = creature;
+```
 
 ## Setting NPM Dependencies in a resource
 
