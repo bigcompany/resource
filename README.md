@@ -1,10 +1,9 @@
-# resource engine
+# Resource engine
 
 ## Define a new resource
 ```js
 var resource = require('resource'),
     creature = resource.define('creature');
-
 ```
 
 ## Add resource properties
@@ -23,10 +22,6 @@ creature.property('life', { type: "number", default: 10 });
 ## Persisting resources to a datasource
 
 ```js
-//
-// This will enable creature to be an instanceible object,
-// capable of being able to be stored the memory datasource
-//
 var resource = require('resource'),
     creature = resource.define('creature');
 
@@ -42,10 +37,8 @@ creature.create({ id: 'bobby', type: 'dragon' }, function (err, result) {
   console.log(result.id);
   console.log(result.type);
 });
-//
-// Enabling persistence will also add: creature.update, creature.destroy, creature.get, creature.find
-//
 ```
+Enabling persistence will also add: `creature.get`, `creature.destroy`, `creature.update`, `creature.find`, `creature.all`.
 
 ## Adding resource methods
 
@@ -116,7 +109,7 @@ creature.method('fire', fire, {
 ## Using resource.before() and resource.after() hooks
 
 ```js
-var resource = require('../'),
+var resource = require('resource'),
     creature = resource.define('creature');
 
 creature.persist('memory');
@@ -138,6 +131,13 @@ creature.create({ id: 'bobby' }, function (err, result) {
   // OUTPUTS: null { id: 'bobby-a', foo: 'bar' }
 });
 ```
+
+## Exporting a resource in a module
+
+var resource = require('../'),
+    creature = resource.define('creature');
+
+exports.creature = creature;
 
 ## Setting NPM Dependencies in a resource
 
