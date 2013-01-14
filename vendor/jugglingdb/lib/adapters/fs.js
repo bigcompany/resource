@@ -1,3 +1,5 @@
+var mkdirp = require('mkdirp');
+
 exports.initialize = function initializeSchema(schema, callback) {
     schema.adapter = new Fs();
     process.nextTick(callback);
@@ -16,6 +18,11 @@ function Fs (options) {
     //
     // END TODO
     //
+
+    //
+    // Ensure that the "db" directory exists before trying to use it
+    //
+    mkdirp.sync(str);
 
     options.path = options.path || str;
     this._models = {};
