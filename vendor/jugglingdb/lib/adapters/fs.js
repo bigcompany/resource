@@ -1,4 +1,7 @@
-var mkdirp = require('mkdirp');
+var safeRequire = require('../utils').safeRequire;
+
+var mkdirp = safeRequire('mkdirp'),
+    nosqlite = safeRequire('nosqlite');
 
 exports.initialize = function initializeSchema(schema, callback) {
     schema.adapter = new Fs();
@@ -28,8 +31,7 @@ function Fs (options) {
     this._models = {};
     this.cache = {};
     this.ids = {};
-    //this.connection = new(require('nosqlite').Connection)();
-    this.connection = new(require('nosqlite').Connection)(options.path);
+    this.connection = new(nosqlite.Connection)(options.path);
 }
 
 Fs.prototype.define = function defineModel(descr) {
