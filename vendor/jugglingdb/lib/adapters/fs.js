@@ -12,22 +12,15 @@ function Fs (options) {
     options = options || {};
 
     //
-    // TODO: remove big logic here, move to resource.js project
+    // Choose a sane default for options.path
     //
-    //console.log(__dirname, process.cwd())
-    //str = require.resolve('big');
-    //str = str.replace('big.js', 'db/')
-    str = process.cwd() + '/db/';
-    //
-    // END TODO
-    //
+    options.path = options.path || process.cwd() + '/db/';
 
     //
     // Ensure that the "db" directory exists before trying to use it
     //
-    mkdirp.sync(str);
+    mkdirp.sync(options.path);
 
-    options.path = options.path || str;
     this._models = {};
     this.cache = {};
     this.ids = {};
