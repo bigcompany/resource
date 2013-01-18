@@ -136,7 +136,7 @@ resource.define = function (name, options) {
   r.persist = function (datasource) {
     datasource = datasource || 'memory';
     r.config.datasource = datasource;
-    persistence.enable(r, { datasource: datasource });
+    persistence.enable(r, datasource);
   };
 
 
