@@ -143,6 +143,7 @@ resource.define = function (name, options) {
   //
   // Attach a copy of the resource to the resources scope ( for later reference )
   //
+  resource[name] = r;
   resource.resources[name] = r;
 
   //
