@@ -1,4 +1,7 @@
-var mkdirp = require('mkdirp');
+var safeRequire = require('../utils').safeRequire;
+
+var mkdirp = safeRequire('mkdirp'),
+    nosqlite = safeRequire('nosqlite');
 
 exports.initialize = function initializeSchema(schema, callback) {
     schema.adapter = new Fs();
@@ -9,27 +12,19 @@ function Fs (options) {
     options = options || {};
 
     //
-    // TODO: remove big logic here, move to resource.js project
+    // Choose a sane default for options.path
     //
-    //console.log(__dirname, process.cwd())
-    //str = require.resolve('big');
-    //str = str.replace('big.js', 'db/')
-    str = process.cwd() + '/db/';
-    //
-    // END TODO
-    //
+    options.path = options.path || process.cwd() + '/db/';
 
     //
     // Ensure that the "db" directory exists before trying to use it
     //
-    mkdirp.sync(str);
+    mkdirp.sync(options.path);
 
-    options.path = options.path || str;
     this._models = {};
     this.cache = {};
     this.ids = {};
-    //this.connection = new(require('nosqlite').Connection)();
-    this.connection = new(require('nosqlite').Connection)(options.path);
+    this.connection = new(nosqlite.Connection)(options.path);
 }
 
 Fs.prototype.define = function defineModel(descr) {
