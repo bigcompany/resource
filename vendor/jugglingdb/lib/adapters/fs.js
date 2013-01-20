@@ -1,7 +1,7 @@
 var safeRequire = require('../utils').safeRequire;
+var nosqlite = require('../nosqlite');
 
-var mkdirp = safeRequire('mkdirp'),
-    nosqlite = safeRequire('nosqlite');
+var mkdirp = safeRequire('mkdirp');
 
 exports.initialize = function initializeSchema(schema, callback) {
     schema.adapter = new Fs();

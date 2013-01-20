@@ -8,7 +8,8 @@
     "node-uuid": "*",
     "colors": "*",
     "mkdirp": "~0.3.4",
-    "which": "1.0.5"
+    "which": "1.0.5",
+    "async": "0.1.22"
   },
   "scripts": {
     "test": "tap test/"

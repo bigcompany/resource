@@ -26,6 +26,7 @@ var persistence = resource.persistence = require('./lib/persistence');
 
 resource.load = require('./lib/load');
 resource.use = require('./lib/use');
+resource.async = require('async');
 
 // map uuid creator onto resource as a convience
 resource.uuid = persistence.uuid;
