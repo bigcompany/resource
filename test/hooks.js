@@ -64,10 +64,18 @@ test("adding another creature.before('create')", function (t) {
 });
 
 test("run it again", function (t) {
-  creature.create({ id: 'bobby' }, function(err, result){
-    t.type(err, "null", 'second creature.before("create") still applied - no error');
-    t.equal(result.id, 'larry-a', 'second creature.before("create") still applied - result.id == "larry-a"');
-    t.end();
+  t.plan(3);
+  //
+  // Because create throws when the instance already exists, we need to destroy
+  // any instances that already exist
+  //
+  creature.destroy('larry-a', function (err) {
+    t.equal(!err, true, 'destroyed instance of larry-a');
+    creature.create({ id: 'bobby' }, function(err, result){
+      t.type(err, "null", 'second creature.before("create") still applied - no error');
+      t.equal(result.id, 'larry-a', 'second creature.before("create") still applied - result.id == "larry-a"');
+      t.end();
+    });
   });
 });
 
@@ -85,10 +93,14 @@ test("adding another creature.before('create')", function (t) {
 });
 
 test("run it again", function (t) {
-  creature.create({ id: 'bobby' }, function(err, result){
-    t.type(err, "null", 'third creature.before("create") still applied - no error');
-    t.equal(result.id, 'larry-a-b', 'third creature.before("create") still applied - result.id == "larry-a-b"');
-    t.end();
+  t.plan(3);
+  creature.destroy('larry-a-b', function (err) {
+    t.equal(!err, true, 'destroyed instance of larry-a-b');
+    creature.create({ id: 'bobby' }, function(err, result){
+      t.type(err, "null", 'third creature.before("create") still applied - no error');
+      t.equal(result.id, 'larry-a-b', 'third creature.before("create") still applied - result.id == "larry-a-b"');
+      t.end();
+    });
   });
 });
 
@@ -96,11 +108,14 @@ test("remove before hooks on creature.create - run creature.create", function (t
   for(var i=0; i <= creature.methods.create.before.length + 1; i++) {
     creature.methods.create.before.pop();
   }
-  t.equal(creature.methods.create.before.length, 0, 'removed create hooks - before.length == 0');
-  creature.create({ id: 'bobby' }, function(err, result){
-    t.type(err, "null", 'removed create hooks - no error');
-    t.equal(result.id, 'not-bobby', 'removed create hooks - only beforeAll applied');
-    t.end();
+  t.plan(3);
+  creature.destroy('not-bobby', function (err, result){
+    t.equal(!err, true, 'destroyed instance of not-bobby');
+    creature.create({ id: 'bobby' }, function(err, result){
+      t.type(err, "null", 'removed create hooks - no error');
+      t.equal(result.id, 'not-bobby', 'removed create hooks - only beforeAll applied');
+      t.end();
+    });
   });
 });
 
@@ -161,16 +176,19 @@ test("adding creature.after('create')", function (t) {
 });
 
 test("adding another creature.after('create')", function (t) {
-  t.plan(4);
+  t.plan(5);
   t.equal(creature.create.after.length, 1);
   creature.after('create', function (data, next) {
     t.equal('jimmy', data.id, 'added second after hook - data.id == "jimmy"');
     next(null, data);
   });
   t.equal(creature.create.after.length, 2, 'added second after hook - after.length == 2');
-  creature.create({ id: 'jimmy' }, function(err, result){
-    t.type(err, "null", 'callback fired - no error');
-    t.end();
+  creature.destroy('jimmy', function(err) {
+    t.type(err, "null", 'destroyed instance of jimmy');
+    creature.create({ id: 'jimmy' }, function(err, result){
+      t.type(err, "null", 'callback fired - no error');
+      t.end();
+    });
   });
 });
 

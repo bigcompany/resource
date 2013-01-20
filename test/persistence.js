@@ -93,6 +93,19 @@ test("executing creature.create", function (t) {
   });
 });
 
+test("executing creature.create - when already created", function (t) {
+  creature.create({
+    id: 'bobby',
+    metadata: data,
+    items: items // array property current has serialization issue
+  }, function(err, result){
+    t.type(err, 'object', 'an error');
+    t.equal(!result, true, 'no result');
+    t.equal(err.message, 'bobby already exists', 'bobby already exists');
+    t.end();
+  });
+});
+
 test("executing creature.get", function (t) {
   creature.get('bobby', function(err, result){
     t.type(err, 'null', 'no error');
