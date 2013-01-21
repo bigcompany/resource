@@ -777,12 +777,13 @@ resource.schema = {
 
   var _logger = resource.define('logger');
   _logger.schema.description = "a simple STDOUT based logger";
-  //
-  // TODO: improve log method schema
-  _logger.method("log", logger.put, {
+  _logger.method("log", logger.log, {
     "description": "logs data to STDOUT",
     "properties": {
-      "data": {
+      "level": {
+        "type": "string"
+      },
+      "message": {
         "type": "any"
       }
     }
