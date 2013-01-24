@@ -242,7 +242,12 @@ resource.installDeps = function (r) {
   });
 
   npm.on('exit', function (code) {
-    console.log('npm just installed', r.name);
+    logger.info('npm just exited with code ' + code.magenta);
+    if (code === 3) {
+      logger.error('cannot install as current user');
+      logger.help('try running this command again with sudo');
+      process.exit(3);
+    }
     _command.forEach(function(c, i){
       if(i !== 0) { // the first command is "install"
         var dep = c.split('@'); // split the dep name based on packagename@semver syntax
