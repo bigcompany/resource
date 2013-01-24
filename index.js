@@ -226,7 +226,7 @@ resource.installDeps = function (r) {
       npmBinary = which.sync('npm');
 
   var spawn = require('child_process').spawn,
-      npm   = spawn(npmBinary, _command, { cwd: process.cwd() });
+      npm   = spawn(npmBinary, _command, { cwd: helper.appDir });
 
   npm.stdout.on('data', function (data) {
     process.stdout.write(data);
@@ -786,7 +786,8 @@ resource.schema = {
     "description": "logs data to STDOUT",
     "properties": {
       "level": {
-        "type": "string"
+        "type": "string",
+        "default": "info"
       },
       "message": {
         "type": "any"
