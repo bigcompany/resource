@@ -22,9 +22,6 @@ creature.property('life', { type: "number", default: 10 });
 ## Persisting resources to a datasource
 
 ```js
-var resource = require('resource'),
-    creature = resource.define('creature');
-
 //
 // Can also persist to 'fs', 'mongo', 'couch', etc...
 //
@@ -109,9 +106,6 @@ creature.method('fire', fire, {
 ## Using resource.before() and resource.after() hooks
 
 ```js
-var resource = require('resource'),
-    creature = resource.define('creature');
-
 creature.persist('memory');
 
 creature.before('create', function (data, next) {
@@ -135,9 +129,6 @@ creature.create({ id: 'bobby' }, function (err, result) {
 ## Exporting a resource in a module
 
 ```js
-var resource = require('../'),
-    creature = resource.define('creature');
-
 exports.creature = creature;
 ```
 
@@ -153,7 +144,7 @@ exports.dependencies = {
 
 ## Use resources in an application
 
-`resource.use` intelligently loads resources and can lazily install required dependencies while deferring resource method invocation.
+`resource.use()` intelligently loads resources and can lazily install required `npm` dependencies while deferring resource method invocation.
 
 ```js
 //
