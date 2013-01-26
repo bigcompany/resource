@@ -1,5 +1,11 @@
 # Resource engine
 
+## Installation
+
+```bash
+npm install resource
+```
+
 ## Define a new resource
 ```js
 var resource = require('resource'),
