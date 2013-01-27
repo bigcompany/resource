@@ -314,7 +314,16 @@ function addMethod (r, name, method, schema, tap) {
     var payload = [],
         callback = args[args.length -1];
 
-    if(Object.keys(resource.installing).length > 0) {
+    //
+    // Determine if a exports.dependencies hash has been specified in the resource,
+    // if so, determine if there are any missing deps that will need to be installed
+    //
+    if (typeof r.dependencies === 'object') {
+      resource.installDeps(r);
+    }
+
+
+    if (Object.keys(resource.installing).length > 0) {
       resource._queue.unshift(function(){
         fn.apply(this, args);
       });
