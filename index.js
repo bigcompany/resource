@@ -15,6 +15,8 @@ resource = new EventEmitter({
   maxListeners: 20, // the max number of listeners that can be assigned to an event
 });
 
+var colors = require('colors');
+
 //
 // Require a simple JSON-Schema validator
 //
@@ -23,7 +25,6 @@ var validator = require('./vendor/validator');
 var helper = resource.helper = require('./lib/helper');
 var logger = resource.logger = require('./lib/logger');
 var persistence = resource.persistence = require('./lib/persistence');
-
 resource.load = require('./lib/load');
 resource.use = require('./lib/use');
 resource.async = require('async');
@@ -242,7 +243,7 @@ resource.installDeps = function (r) {
   });
 
   npm.on('exit', function (code) {
-    logger.info('npm just exited with code ' + code.magenta);
+    logger.info('npm just exited with code ' + code.toString().red);
     if (code === 3) {
       logger.error('cannot install as current user');
       logger.help('try running this command again with sudo');
