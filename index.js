@@ -262,6 +262,8 @@ resource.installDeps = function (r) {
       for(var m in resource._queue) {
         resource._queue[m]();
       }
+      // reset the queue
+      resource._queue = [];
     }
   });
 
