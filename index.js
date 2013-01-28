@@ -259,11 +259,18 @@ resource.installDeps = function (r) {
     if(Object.keys(resource.installing).length === 0) {
       logger.info('npm installation complete');
       logger.warn('now executing ' + resource._queue.length + ' defferred call(s)');
-      for(var m in resource._queue) {
-        resource._queue[m]();
+
+      //
+      // Calling an element in the queue can add new elements to the queue on
+      // the same tick. So we only do the ones that were ready *this* time,
+      // and the new elements are properly deferred.
+      //
+      var length = resource._queue.length,
+          m;
+
+      for(m = 0; m < length; m++) {
+        resource._queue.pop()();
       }
-      // reset the queue
-      resource._queue = [];
     }
   });
 
