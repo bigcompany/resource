@@ -15,6 +15,27 @@ resource = new EventEmitter({
   maxListeners: 20, // the max number of listeners that can be assigned to an event
 });
 
+//
+// Attempt to re-emit scoped events onto their corresponding resources
+//
+resource._emit = resource.emit;
+resource.emit = function () {
+  var args = [].slice.call(arguments),
+      event = args.shift(),
+      splitted = event.split('::'),
+      r;
+
+  if (splitted.length > 1 && resource[splitted[0]]) {
+    r = resource[splitted[0]];
+  }
+
+  if (r && r._emit) {
+    r._emit.apply(r, [ splitted.slice(1).join('::') ].concat(args));
+  }
+
+  return resource._emit.apply(resource, [ event ].concat(args));
+};
+
 var colors = require('colors');
 
 //
@@ -45,7 +66,11 @@ resource.define = function (name, options) {
   //
   // Create an empty resource object
   //
-  var r = {};
+  var r = new EventEmitter({
+    wildcard: true, // event emitter should use wildcards ( * )
+    delimiter: '::', // the delimiter used to segment namespaces
+    maxListeners: 20, // the max number of listeners that can be assigned to an event
+  });
 
   options = options || {};
 
@@ -67,6 +92,18 @@ resource.define = function (name, options) {
   // If any additional configuration data has been passed in, assign it to the resource
   //
   r.config = options.config || {};
+
+  //
+  // Also emit events on the resource scope
+  //
+  r._emit = r.emit;
+  r.emit = function () {
+    var args = [].slice.call(arguments),
+        event = args.shift();
+
+    resource._emit.apply(resource, [ r.name + '::' + event ].concat(args));
+    return r._emit.apply(r, [ event ].concat(args));
+  };
 
   //
   // Give the resource a property() method for defining properties
