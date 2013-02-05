@@ -162,10 +162,39 @@ test("executing creature.update", function (t) {
   });
 });
 
+test("executing create.update - when creature des not exist", function (t) {
+  creature.update({ id: 'larry' }, function (err, result) {
+    t.type(err, 'object', 'an error');
+    t.equal(!result, true, 'no result');
+    t.equal(err.message, 'larry not found', 'could not find larry');
+    t.end();
+  });
+});
+
+test("executing creature.updateOrCreate - with a new id", function (t) {
+  creature.updateOrCreate({ id: 'larry' }, function (err, result) {
+    t.type(err, 'null', 'created larry - no error');
+    t.type(result, 'object', 'created larry - result is object');
+    t.end();
+  });
+});
+
+test("executing create.updateOrCreate = with existing id", function (t) {
+  creature.updateOrCreate({ id: 'bobby', life: 5 }, function (err, result) {
+    t.type(err, 'null', 'updated bobby - no error');
+    t.type(result, 'object', 'updated bobby - result is object');
+    t.equal(result.life, 5, 'updated bobby - result.life == 5');
+    t.end();
+  });
+});
+
 test("executing creature.destroy", function (t) {
+  t.plan(2);
   creature.destroy('bobby', function(err, result){
     t.type(result, 'null', 'destroyed bobby');
-    t.end();
+  });
+  creature.destroy('larry', function(err, result){
+    t.type(result, 'null', 'destroyed larry');
   });
 });
 
