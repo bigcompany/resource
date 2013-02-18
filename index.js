@@ -502,12 +502,7 @@ function addMethod (r, name, method, schema, tap) {
         //       properties.callback = arguments['1']
         //
         //
-
-        if (typeof schema.properties === "object" && typeof schema.properties.options === "object" && typeof args[0] === "object") {
-          _data.options = args[0];
-        }
-
-        if (typeof schema.properties === "object" && typeof schema.properties.options === "undefined") {
+        if (typeof schema.properties === "object") {
           Object.keys(schema.properties).forEach(function(prop,i){
             _data[prop] = args[i];
           });
@@ -517,6 +512,7 @@ function addMethod (r, name, method, schema, tap) {
         // Create a new schema instance with default values, mixed in with supplied arguments data
         //
         _instance = resource.instantiate(schema, _data);
+
         //
         // Perform a schema validation on the new instance to ensure validity
         //
