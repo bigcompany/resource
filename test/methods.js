@@ -17,12 +17,12 @@ test("define creature resource", function (t) {
 });
 
 test("define method on creature - with no method", function (t) {
+  t.plan(1);
   try {
     creature.method('poke');
   } catch (err) {
     t.ok(true, 'could not add poke')
   }
-  t.end()
 });
 
 test("define method on creature - with schema - single text argument", function (t) {
@@ -343,4 +343,29 @@ test("define method on creature - with object schema - and additional non-schema
     t.equal(result.target, 'bob', 'talked! - result.target == "bob"');
     t.end()
   });
+});
+
+test("define method on creature - with schema - and two arguments - options, number", function (t) {
+  creature.method('eat', function(options, n){
+    return { food: options.food, amount: n };
+  }, {
+    "properties": {
+      "options": {
+        "food": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "n": {
+        "type": "number"
+      }
+    }
+  });
+  var result = creature.eat({ "food": "cabbage" }, 3);
+  t.equal(result.food, "cabbage", "creature ate cabbage");
+  t.equal(result.amount, 3, "creature ate 3 of them");
+  t.end();
+
 });
