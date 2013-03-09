@@ -50,6 +50,8 @@ resource.load = require('./lib/load');
 resource.use = require('./lib/use');
 resource.async = require('async');
 
+resource.isResource = resource.helper.isResource;
+
 // map uuid creator onto resource as a convience
 resource.uuid = persistence.uuid;
 
