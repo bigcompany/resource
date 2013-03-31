@@ -43,6 +43,22 @@ creature.create({ id: 'bobby', type: 'dragon' }, function (err, result) {
 ```
 Enabling persistence will also add: `creature.get`, `creature.destroy`, `creature.update`, `creature.find`, `creature.all`.
 
+## Persisting resources with options
+
+```js
+//
+// The fs datasource uses the "path" property instead of
+// "host" and "port"
+//
+creature.persist({
+  type: 'couch',
+  host: 'this-is-a-sandbox.iriscouch.com',
+  port: 5984,
+  username: 'guest',
+  password: 'parakeet'
+});
+```
+
 ## Adding resource methods
 
 ```js
