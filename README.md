@@ -1,4 +1,20 @@
-# Resource engine
+# JavaScript Resource engine
+
+## Purpose
+
+The resource library provides an easy way to define schema for JavaScript objects and JavaScript function definitions. Through creating resources, the developer is freed from having to write the same boiler-plate code over and over again. Resources are friendly to use and highly introspect-able allowing for very easy reflection.
+
+## Features
+
+ - Simple API
+ - Resources can persist to multiple datasource types ( Memory / Couch / FS / Mongo / etc..)
+ - Provides validation and schema for JavaScript Objects and Functions
+ - Resources are highly introspect-able
+ - Built-in hook system for resource methods
+ - Resources can be CommonJS Modules
+ - Resources support NPM dependencies with lazy installs and resource method deferment
+ - JSON-Schema compatible
+ - Large library of [pre-built resources](http://github.com/bigcompany/resources) available
 
 ## Installation
 
