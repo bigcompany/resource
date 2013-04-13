@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The resource library provides an easy way to define schema for JavaScript objects and JavaScript function definitions. Through creating resources, the developer is freed from having to write the same boiler-plate code over and over again. Resources are friendly to use and highly introspect-able allowing for very easy reflection.
+The resource library provides an easy way to define schema for JavaScript objects and JavaScript function definitions. Through creating resources, the developer is freed from having to write the same validation and interface boiler-plate code over and over again. Resources are friendly to use and highly introspect-able allowing for very easy reflection.
 
 ## Features
 
