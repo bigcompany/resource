@@ -50,6 +50,11 @@ resource.load = require('./lib/load');
 resource.use = require('./lib/use');
 resource.async = require('async');
 
+//
+// Resource environment, either set to NODE_ENV or "development"
+//
+resource.env = process.env.NODE_ENV || 'development';
+
 resource.isResource = resource.helper.isResource;
 
 // map uuid creator onto resource as a convience
