@@ -158,10 +158,11 @@ test("executing creature.all", function (t) {
 });
 
 test("executing creature.update", function (t) {
-  creature.update({ id: 'bobby', life: 9999 }, function(err, result){
+  creature.update({ id: 'bobby', life: 9999 , items: items}, function(err, result){
     t.type(err, 'null', 'updated bobby - no error');
     t.type(result, 'object', 'updated bobby - result is object');
     t.equal(result.life, 9999, 'updated bobby - result.life == 9999');
+    t.type(result.items, Array, 'items is array');
     t.end();
   });
 });
