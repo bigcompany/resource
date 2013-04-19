@@ -74,7 +74,7 @@ test("executing creature.create", function (t) {
   creature.create({
     id: 'bobby',
     metadata: data,
-    items: items // array property current has serialization issue
+    items: items // array property currently has serialization issue
   }, function(err, result){
     t.type(err, 'null', 'no error');
     t.type(result, 'object', 'result is object');
@@ -88,7 +88,7 @@ test("executing creature.create", function (t) {
     //
     // TODO: fix serialization issue with array property type
     //
-    // t.equal(Array.isArray(result.data), true, 'items is array');
+    t.type(result.items, Array, 'items is array');
     t.end();
   });
 });
@@ -115,6 +115,10 @@ test("executing creature.get", function (t) {
     t.equal(result.metadata.abc, 123);
     t.equal(result.metadata.data.prop1, 'foo');
     t.equal(result.metadata.data.prop2, 'bar');
+    //
+    // TODO: fix serialization issue with array property type
+    //
+    t.type(result.items, Array, 'items is array');
     t.end();
   });
 });
@@ -162,7 +166,7 @@ test("executing creature.update", function (t) {
   });
 });
 
-test("executing create.update - when creature des not exist", function (t) {
+test("executing create.update - when creature does not exist", function (t) {
   creature.update({ id: 'larry' }, function (err, result) {
     t.type(err, 'object', 'an error');
     t.equal(!result, true, 'no result');
