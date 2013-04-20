@@ -2,6 +2,7 @@ var tap = require("tap")
   , test = tap.test
   , plan = tap.plan
   , List = require("../vendor/jugglingdb/lib/list")
+  , account
   , creature
   , resource;
 
@@ -44,6 +45,23 @@ test("define creature resource - with datasource config", function (t) {
   t.type(creature.get, 'function', 'methods hoisted - creature.get is function');
   t.type(creature.find, 'function', 'methods hoisted - creature.find is function');
   t.type(creature.destroy, 'function', 'methods hoisted - creature.destroy is function');
+
+  t.end()
+});
+
+test("define account resource - with datasource config", function (t) {
+  account = resource.define('account', { config: { datasource: testDatasource }});
+
+  account.property('name', {
+    "type": "string"
+  });
+
+  account.property('email', {
+    "type": "string"
+  });
+
+  t.type(account.config, 'object', 'configuration defined - account.config is object');
+  t.equal(testDatasource, account.config.datasource, ('configuration defined - account.config.datasource == "' + testDatasource + '"'));
 
   t.end()
 });
@@ -151,8 +169,9 @@ test("executing creature.all", function (t) {
   });
 });
 
+
 test("executing creature.update", function (t) {
-  creature.update({ id: 'bobby', life: 9999 , items: items}, function(err, result){
+  creature.update({ id: 'bobby', life: 9999 , items: items }, function(err, result){
     t.type(err, 'null', 'updated bobby - no error');
     t.type(result, 'object', 'updated bobby - result is object');
     t.equal(result.life, 9999, 'updated bobby - result.life == 9999');
@@ -171,18 +190,31 @@ test("executing create.update - when creature does not exist", function (t) {
 });
 
 test("executing creature.updateOrCreate - with a new id", function (t) {
-  creature.updateOrCreate({ id: 'larry' }, function (err, result) {
+  creature.updateOrCreate({ id: 'larry', items: items  }, function (err, result) {
     t.type(err, 'null', 'created larry - no error');
     t.type(result, 'object', 'created larry - result is object');
+    t.type(result.items, List, 'items is array');
     t.end();
   });
 });
 
 test("executing create.updateOrCreate = with existing id", function (t) {
-  creature.updateOrCreate({ id: 'bobby', life: 5 }, function (err, result) {
+  creature.updateOrCreate({ id: 'bobby', life: 5, items: items  }, function (err, result) {
     t.type(err, 'null', 'updated bobby - no error');
     t.type(result, 'object', 'updated bobby - result is object');
     t.equal(result.life, 5, 'updated bobby - result.life == 5');
+    t.type(result.items, List, 'items is array');
+    t.end();
+  });
+});
+
+test("executing account.create with same id as a creature", function (t) {
+  account.create({
+    id: 'bobby'
+  }, function(err, result){
+    t.type(err, 'null', 'no error');
+    t.type(result, 'object', 'result is object');
+    t.equal(result.id, 'bobby', 'id is correct');
     t.end();
   });
 });
