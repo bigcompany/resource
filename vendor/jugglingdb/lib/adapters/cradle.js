@@ -28,7 +28,7 @@ function naturalize(data, model) {
     return data;
 }
 function idealize(data) {
-    data.id = data._id;
+    data.id = data._id.replace(data.nature + '/', '');
     return data;
 }
 function stringify(data) {
@@ -42,7 +42,7 @@ function errorHandler(callback, func) {
       } else {
          if(func) {
             func(res, function(res) {
-               callback(null, res);
+              callback(null, res);
             });
          } else {
             callback(null, res);
@@ -189,16 +189,20 @@ CradleAdapter.prototype.define = function(descr) {
 };
 
 CradleAdapter.prototype.create = function(model, data, callback) {
+    data.id = model + '/' + data.id;
+    naturalize(data, model)
     this.client.save(
        stringify(data.id),
        naturalize(data, model),
        errorHandler(callback, function(res, cb) {
+          res.id = res.id.replace(model + '/', '');
           cb(res.id);
        })
     );
 };
 
 CradleAdapter.prototype.save = function(model, data, callback) {
+   data.id = model + '/' + data.id;
    this.client.save(
        stringify(data.id),
        naturalize(data, model),
@@ -208,7 +212,7 @@ CradleAdapter.prototype.save = function(model, data, callback) {
 
 CradleAdapter.prototype.updateAttributes = function(model, id, data, callback) {
     this.client.merge(
-       stringify(id),
+       stringify(data.id),
        data,
        errorHandler(callback, function(doc, cb) {
           cb(idealize(doc));
@@ -217,6 +221,7 @@ CradleAdapter.prototype.updateAttributes = function(model, id, data, callback) {
 };
 
 CradleAdapter.prototype.updateOrCreate = function(model, data, callback) {
+   data.id = model + '/' + data.id;
    this.client.get(
       stringify(data.id),
       function (err, doc) {
@@ -242,6 +247,7 @@ CradleAdapter.prototype.exists = function(model, id, callback) {
 };
 
 CradleAdapter.prototype.find = function(model, id, callback) {
+    id = model + '/' + id;
     this.client.get(
        stringify(id),
        errorHandler(callback, function(doc, cb) {
@@ -287,6 +293,7 @@ CradleAdapter.prototype.all = function(model, filter, callback) {
  * Detroy methods
  */
 CradleAdapter.prototype.destroy = function(model, id, callback) {
+    id = model + '/' + id;
     this.client.remove(
        stringify(id),
        function (err, doc) {
