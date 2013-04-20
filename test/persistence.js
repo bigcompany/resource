@@ -229,6 +229,13 @@ test("executing creature.destroy", function (t) {
   });
 });
 
+test("executing account.destroy", function (t) {
+  t.plan(1);
+  account.destroy('bobby', function(err, result){
+    t.type(result, 'null', 'destroyed bobby');
+  });
+});
+
 test("executing creature.get", function (t) {
   creature.get('bobby', function(err, result){
     t.type(err, 'object', 'could not find bobby');
