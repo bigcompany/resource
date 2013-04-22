@@ -2,7 +2,8 @@ var tap = require("tap")
   , test = tap.test
   , plan = tap.plan
   , creature
-  , resource;
+  , resource
+  , List = require("../vendor/jugglingdb/lib/list");
 
 test("load resource module", function (t) {
   resource = require('../');
@@ -380,4 +381,38 @@ test("define method on creature - with schema - and two arguments - options, num
   t.equal(result.amount, 3, "creature ate 3 of them");
   t.end();
 
+});
+
+//
+// Tests for methods applied to persisted resources
+//
+test("define method on creature - with schema - and one argument - array", function (t) {
+  creature.method('throw', function (c) {
+    c.items.forEach(function (i) {
+      resource.logger.info(c.id + ' threw ' + i + '!');
+    });
+    c.items = [];
+  }, { properties: { items: { type: 'array' }}});
+  t.end();
+});
+
+test("define property on creature - array", function (t) {
+  creature.property('items', { type: 'array' });
+  t.end();
+});
+
+test("create creature with array property and pass to method", function (t) {
+  creature.persist('memory');
+
+  creature.create({ id: 'korben', items: [ 'ball', 'hammer', 'potato' ] }, function (err, c) {
+    t.error(err, 'no error');
+    t.type(c.id, 'string', 'id is a string');
+    t.type(c.items, List, 'items is a list');
+    t.equal(c.items.length, 3, 'items has length 3');
+    t.doesNotThrow(function () {
+      creature.throw(c);
+    }, 'call creature method without error');
+    t.equal(c.items.length, 0, 'items has length 0');
+    t.end();
+  });
 });
