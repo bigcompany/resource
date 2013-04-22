@@ -50,11 +50,17 @@ test("define method on creature - with schema - and single text argument - with 
     }
   });
   var result;
-  result = creature.talk(123);
-  t.equal(result[0].attribute, 'type', 'did not talk - result[0].attribute == "type"');
-  t.equal(result[0].property, 'text', 'did not talk - result[0].attribute == "text"');
-  t.equal(result[0].actual, 'number', 'did not talk - result[0].actual == "number"');
-  t.end()
+  try {
+    result = creature.talk(123);
+  }
+  catch (err) {
+    t.doesNotThrow(function () {
+      t.equal(err.errors[0].attribute, 'type', 'did not talk - result[0].attribute == "type"');
+      t.equal(err.errors[0].property, 'text', 'did not talk - result[0].attribute == "text"');
+      t.equal(err.errors[0].actual, 'number', 'did not talk - result[0].actual == "number"');
+    }, 'thrown error has array of validation errors');
+    t.end()
+  }
 });
 
 test("define method on creature - with schema - single text argument - with default", function (t) {
@@ -129,11 +135,17 @@ test("define method on creature - with schema - and single boolean argument - wi
     }
   });
   var result;
-  result = creature.talk('hello');
-  t.equal(result[0].attribute, 'type', 'did not talk - result[0].attribute == "type"');
-  t.equal(result[0].property, 'mute', 'did not talk - result[0].attribute == "mute"');
-  t.equal(result[0].actual, 'string', 'did not talk - result[0].actual == "string"');
-  t.end()
+  try {
+    result = creature.talk('hello');
+  }
+  catch (err) {
+    t.doesNotThrow(function () {
+    t.equal(err.errors[0].attribute, 'type', 'did not talk - result[0].attribute == "type"');
+    t.equal(err.errors[0].property, 'mute', 'did not talk - result[0].attribute == "mute"');
+    t.equal(err.errors[0].actual, 'string', 'did not talk - result[0].actual == "string"');
+    }, 'thrown error has validation errors array');
+    t.end();
+  }
 });
 
 test("define method on creature - with schema - and one callback argument", function (t) {

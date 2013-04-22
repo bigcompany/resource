@@ -545,10 +545,7 @@ function addMethod (r, name, method, schema, tap) {
 
             return callback(validationError);
           } else {
-            //
-            // If there is no valid callback, return an error ( for now )
-            //
-            return validate.errors;
+            throw validationError;
           }
         }
 
