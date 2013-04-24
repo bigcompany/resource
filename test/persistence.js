@@ -1,7 +1,6 @@
 var tap = require("tap")
   , test = tap.test
   , plan = tap.plan
-  , List = require("../vendor/jugglingdb/lib/list")
   , account
   , creature
   , resource;
@@ -103,7 +102,7 @@ test("executing creature.create", function (t) {
     t.equal(result.metadata.abc, 123);
     t.equal(result.metadata.data.prop1, 'foo');
     t.equal(result.metadata.data.prop2, 'bar');
-    t.type(result.items, List, 'items is array');
+    t.type(result.items, Array, 'items is array');
     t.end();
   });
 });
@@ -130,7 +129,7 @@ test("executing creature.get", function (t) {
     t.equal(result.metadata.abc, 123);
     t.equal(result.metadata.data.prop1, 'foo');
     t.equal(result.metadata.data.prop2, 'bar');
-    t.type(result.items, List, 'items is array');
+    t.type(result.items, Array, 'items is array');
     t.end();
   });
 });
@@ -175,7 +174,7 @@ test("executing creature.update", function (t) {
     t.type(err, 'null', 'updated bobby - no error');
     t.type(result, 'object', 'updated bobby - result is object');
     t.equal(result.life, 9999, 'updated bobby - result.life == 9999');
-    t.type(result.items, List, 'items is array');
+    t.type(result.items, Array, 'items is array');
     t.end();
   });
 });
@@ -193,7 +192,7 @@ test("executing creature.updateOrCreate - with a new id", function (t) {
   creature.updateOrCreate({ id: 'larry', items: items  }, function (err, result) {
     t.type(err, 'null', 'created larry - no error');
     t.type(result, 'object', 'created larry - result is object');
-    t.type(result.items, List, 'items is array');
+    t.type(result.items, Array, 'items is array');
     t.end();
   });
 });
@@ -203,7 +202,7 @@ test("executing create.updateOrCreate = with existing id", function (t) {
     t.type(err, 'null', 'updated bobby - no error');
     t.type(result, 'object', 'updated bobby - result is object');
     t.equal(result.life, 5, 'updated bobby - result.life == 5');
-    t.type(result.items, List, 'items is array');
+    t.type(result.items, Array, 'items is array');
     t.end();
   });
 });
