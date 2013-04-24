@@ -533,9 +533,10 @@ function addMethod (r, name, method, schema, tap) {
           // Create an error of type Error
           //
           validationError = new Error(
-            'Invalid arguments for method `' + r.name + '.' + name + '`. Try logging `err.errors`'
+            'Invalid arguments for method `' + r.name + '.' + name + '`. '
           );
           validationError.errors = validate.errors;
+          validationError.message = validationError.message + JSON.stringify(validationError.errors, true, 2);
 
           resource.emit(r.name + '::' + name + '::error', validationError);
           if (typeof callback === 'function') {
