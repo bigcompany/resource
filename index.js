@@ -801,6 +801,58 @@ function addProperty (r, name, schema) {
   }
 }
 
+//
+// Special helper method for invoking resource methods from various interfaces
+// In most cases, you will never call resource.invoke()
+//
+// resource.invoke() is useful when dealing with situations where you have arguments data for a resource method,
+// but are not sure of the resource methods arguments schema.
+//
+// It's also useful for invoking sync resource methods from async interfaces such as,
+// calling a method that returns a value from an HTTP interface ( which expects a continued value to respond with )
+//
+//
+resource.invoke = function (method, data, callback) {
+
+  var result;
+  //
+  // If any data was passed in
+  //
+  if(Object.keys(data).length > 0) {
+
+    //
+    // If an options hash is expected as part of the resource method schema
+    //
+    if(method.schema.properties.options) {
+      result = method.call(this, data, callback);
+    } else {
+      //
+      // If no options hash is expected, curry the arguments left to right into an array
+      //
+      var args = [];
+      for(var p in data) {
+        args.push(data[p]);
+      }
+      args.push(callback);
+      result = method.apply(this, args);
+    }
+  } else {
+    //
+    // No data was passed in, execute the resource method with no data
+    //
+    result = method.call(this, callback);
+  }
+
+  //
+  // Remark: If the resource method returns a value this indicates method is sync,
+  // and that the continuation must be manually called with no error condition
+  //
+  if(typeof result !== 'undefined') {
+    return callback(null, result)
+  }
+
+};
+
 resource._queue = [];
 
 //
