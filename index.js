@@ -15,27 +15,6 @@ resource = new EventEmitter({
   maxListeners: 20, // the max number of listeners that can be assigned to an event
 });
 
-//
-// Attempt to re-emit scoped events onto their corresponding resources
-//
-resource._emit = resource.emit;
-resource.emit = function () {
-  var args = [].slice.call(arguments),
-      event = args.shift(),
-      splitted = event.split('::'),
-      r;
-
-  if (splitted.length > 1 && resource[splitted[0]]) {
-    r = resource[splitted[0]];
-  }
-
-  if (r && r._emit) {
-    r._emit.apply(r, [ splitted.slice(1).join('::') ].concat(args));
-  }
-
-  return resource._emit.apply(resource, [ event ].concat(args));
-};
-
 var colors = require('colors');
 
 //
@@ -68,10 +47,54 @@ resource._queue = [];
 //
 resource.resources = {};
 
+
+/*
+
+ A quick primer on working with Events and Resource Methods
+
+ The resource module itself is an Event Emitter
+
+   resources('hello', fn);
+   resource.emit('hello', fn)
+
+ All defined resources are also Event Emitters
+
+   resource.resources.creature.on('hello', fn)
+   resource.resources.creature.emit('hello', fn)
+
+ When resource methods are executed on a defined resource, a local resource event is emitted
+
+   resource.resources.creature.create({ type: 'dragon' }, fn); => resource.resources.creature.emit('create', { type: 'dragon' });
+
+ When any event is emitted from a defined resource, it is rebroadcasted to the resource module ( delimited with :: )
+
+  resource.resources.creature.create({ type: 'dragon' }, fn); => resource.emit('creature::create', { type: 'dragon' });
+
+*/
+resource._emit = resource.emit;
+resource.emit = function () {
+  var args = [].slice.call(arguments),
+      event = args.shift(),
+      splitted = event.split('::'),
+      r;
+
+  if (splitted.length > 1 && resource[splitted[0]]) {
+    r = resource[splitted[0]];
+  }
+
+  if (r && r._emit) {
+    r._emit.apply(r, [ splitted.slice(1).join('::') ].concat(args));
+  }
+  return resource._emit.apply(resource, [ event ].concat(args));
+};
+
+//
+// Defines a new resource
+//
 resource.define = function (name, options) {
 
   //
-  // Create an empty resource object
+  // Resources are event emitters
   //
   var r = new EventEmitter({
     wildcard: true, // event emitter should use wildcards ( * )
@@ -85,7 +108,15 @@ resource.define = function (name, options) {
   // Initalize the resource with default values
   //
   r.name = name;
+
+  //
+  // Resource starts with no methods
+  //
   r.methods = {};
+
+  //
+  // Resource starts with no schema
+  //
   r.schema = options.schema || {
     "description": "",
     "properties": {
@@ -96,12 +127,12 @@ resource.define = function (name, options) {
   };
 
   //
-  // If any additional configuration data has been passed in, assign it to the resource
+  // If any additional configuration data has been passed in assign it to the resource
   //
   r.config = options.config || {};
 
   //
-  // Also emit events on the resource scope
+  // Any local resource events should be re-emitted to the resource module scope
   //
   r._emit = r.emit;
   r.emit = function () {
@@ -113,14 +144,14 @@ resource.define = function (name, options) {
   };
 
   //
-  // Give the resource a property() method for defining properties
+  // Give the resource a property() method for creating new resource properties
   //
   r.property = function (name, schema) {
     addProperty(r, name, schema);
   };
 
   //
-  // Give the resource a method() method for defining methods
+  // Give the resource a method() method for creating new resource methods
   //
   r.method = function (name, method, schema) {
     if (typeof method !== 'function') {
@@ -148,6 +179,9 @@ resource.define = function (name, options) {
     r.methods[method].before.unshift(callback);
   };
 
+  //
+  // Give the resource a .after() method for defining after hooks on resource methods
+  //
   r.after = function (method, callback) {
     //
     // If no method exists on the resource yet create a place holder,
@@ -199,7 +233,6 @@ resource.define = function (name, options) {
 
 };
 
-
 resource.before = [];
 
 //
@@ -215,7 +248,9 @@ resource.beforeAll = function (callback) {
 };
 
 //
-// Installs missing deps
+// Installs npm dependencies from resource defintions
+// After all npm deps are installed, any queued up resource methods that were defferred due to
+// missing deps, will now drain and execute
 //
 resource.installDeps = function (r) {
 
@@ -236,7 +271,6 @@ resource.installDeps = function (r) {
     try {
       require.resolve(resourcePath);
     } catch (err) {
-      
       logger.warn(r.name.magenta + ' resource is missing a required dependency: ' + dep.yellow)
       // TODO: check to see if dep is already in the process of being installed,
       // if so, don't attempt to install it twice
