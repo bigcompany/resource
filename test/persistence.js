@@ -248,3 +248,59 @@ test("executing creature.all", function (t) {
     t.end();
   });
 });
+
+test("persist creature to couchdb", function (t) {
+  creature.persist({ name: "big-test", type: "couchdb" });
+  t.end();
+});
+
+//
+// Tests for modifying instances outside the use of jugglingdb
+// (example: modifying a couchdb doc with futon)
+//
+test("modify persisted documents outside of jugglingdb", function (t) {
+  var request = require('request');
+
+  creature.updateOrCreate({ id: "korben", life: 10 }, function (err, korben) {
+    t.error(err, 'successfully created korben');
+    korben = korben || {};
+
+    t.equal(korben.life, 10, 'korben has life 10');
+
+    var uri = 'http://localhost:5984/big-test/creature%2Fkorben';
+
+    request({
+      uri: uri,
+      json: true
+    }, function (err, res, doc) {
+      t.error(err, 'successfully requested couchdb document');
+
+      doc.life = 100;
+
+      request({
+        method: 'POST',
+        uri: uri,
+        json: doc
+      }, function (err, res) {
+        t.error(err, 'successfully modified couchd document');
+
+        creature.get('korben', function (err, korben) {
+          t.error(err, 'successfully got korben');
+          korben = korben || {};
+
+          t.equal(korben.life, 100, 'korben has life 100');
+
+          korben.life = 50;
+
+          creature.update(korben, function (err, korben) {
+            t.error(err, 'successfully updated korben');
+            korben = korben || {};
+
+            t.equal(korben.life, 50, 'korben has life 50');
+            t.end();
+          });
+        });
+      });
+    });
+  });
+});
