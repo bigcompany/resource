@@ -261,11 +261,12 @@ test("persist creature to couchdb", function (t) {
 test("modify persisted documents outside of jugglingdb", function (t) {
   var request = require('request');
 
-  creature.updateOrCreate({ id: "korben", life: 10 }, function (err, korben) {
+  creature.updateOrCreate({ id: "korben", life: 10, items: [], metadata: {} }, function (err, korben) {
     t.error(err, 'successfully created korben');
-    korben = korben || {};
 
-    t.equal(korben.life, 10, 'korben has life 10');
+    t.doesNotThrow(function () {
+      t.equal(korben.life, 10, 'korben has life 10');
+    }, 'korben is an object');
 
     var uri = 'http://localhost:5984/big-test/creature%2Fkorben';
 
@@ -278,25 +279,28 @@ test("modify persisted documents outside of jugglingdb", function (t) {
       doc.life = 100;
 
       request({
-        method: 'POST',
+        method: 'PUT',
         uri: uri,
         json: doc
-      }, function (err, res) {
-        t.error(err, 'successfully modified couchd document');
+      }, function (err, res, body) {
+        t.error(err, 'no error');
+        t.equal(res.statusCode, 201, 'document was successfully updated');
+        t.ok(body.ok, 'couchdb says ok');
 
         creature.get('korben', function (err, korben) {
           t.error(err, 'successfully got korben');
-          korben = korben || {};
 
-          t.equal(korben.life, 100, 'korben has life 100');
-
-          korben.life = 50;
+          t.doesNotThrow(function () {
+            t.equal(korben.life, 100, 'korben has life 100');
+            korben.life = 50;
+          }, 'korben is an object');
 
           creature.update(korben, function (err, korben) {
             t.error(err, 'successfully updated korben');
-            korben = korben || {};
 
-            t.equal(korben.life, 50, 'korben has life 50');
+            t.doesNotThrow(function () {
+              t.equal(korben.life, 50, 'korben has life 50');
+            }, 'korben is an object');
             t.end();
           });
         });
