@@ -102,6 +102,13 @@ function filtering(res, model, filter, instance) {
       if(filter.where == null) filter.where = {};
       filter.where.nature = model;
    }
+
+   for(var p in filter) {
+     if (p !== 'where') {
+       filter.where[p] = filter[p];
+     }
+   }
+
    // do we need some filtration?
    if (filter.where) {
       res = res ? res.filter(applyFilter(filter)) : res;
@@ -275,7 +282,6 @@ CradleAdapter.prototype.models = function(model, filter, callback, func) {
              return idealize(doc); 
           });
           var filtered = filtering(docs, model, filter, this._models)
-
           func ? func(filtered, cb) : cb(filtered);
        }.bind(this))
     );
