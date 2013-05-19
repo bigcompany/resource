@@ -92,7 +92,7 @@ Fs.prototype.destroy = function destroy(model, id, callback) {
 Fs.prototype.all = function all(model, filter, callback) {
   var db = this.connection.database(model);
   db.create(function(){
-    db.find(filter, function(err, docs){
+    db.find(filter.where, function(err, docs){
       callback(err, docs);
     });
   });
