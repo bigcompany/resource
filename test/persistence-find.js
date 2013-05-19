@@ -42,16 +42,24 @@ function testDatasource(config) {
   ];
 
   test("persist creature to " + config.type + " datasource", function (t) {
-    creature.persist(config);
+    t.doesNotThrow(function () {
+      creature.persist(config);
+    }, 'persisted creature to ' + config.type);
     t.end();
   });
 
   test("create creatures - with " + config.type + " datasource", function (t) {
-    t.plan(3);
+    t.plan(15);
 
     creatures.forEach(function (c) {
       creature.create(c, function (err) {
         t.error(err, 'created creature ' + c.id);
+        creature.get(c.id, function (err, _c) {
+          t.error(err, 'creature ' + c.id + ' exists');
+          t.equal(_c.id, c.id, 'id for ' + c.id + ' is correct');
+          t.equal(_c.type, c.type, 'type for ' + c.id + ' is correct');
+          t.equal(_c.life, c.life, 'life for ' + c.id + ' is correct');
+        });
       });
     });  
   });
