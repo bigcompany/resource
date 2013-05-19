@@ -300,12 +300,34 @@ CradleAdapter.prototype.all = function(model, filter, callback) {
  */
 CradleAdapter.prototype.destroy = function(model, id, callback) {
     id = model + '/' + id;
-    this.client.remove(
-       stringify(id),
-       function (err, doc) {
-         callback(err);
-       }
-    );
+
+    var self = this;
+
+    if (this.client.connection.options.cache) {
+        this.client.remove(
+            id,
+            function (err, doc) {
+                callback(err);
+            }
+        );
+    }
+    else {
+        this.client.get(
+            stringify(id),
+            function (err, doc) {
+                if (err) {
+                    return callback(err);
+                }
+                self.client.remove(
+                    doc.id,
+                    doc._rev,
+                    function (err, doc) {
+                        callback(err);
+                    }
+                );
+            }
+        );
+    }
 };
 
 CradleAdapter.prototype.destroyAll = function(model, callback) {
