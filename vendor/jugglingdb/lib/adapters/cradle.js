@@ -155,7 +155,7 @@ exports.initialize = function(schema, callback) {
         var host = schema.settings.host || 'localhost';
         var port = schema.settings.port || '5984';
         var options = schema.settings.options || {
-           cache: false,
+           cache: true,
            raw: false
         };
         if (schema.settings.username) {
