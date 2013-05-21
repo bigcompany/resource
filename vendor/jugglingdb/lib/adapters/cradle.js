@@ -275,16 +275,31 @@ CradleAdapter.prototype.count = function(model, callback, where) {
 };
 
 CradleAdapter.prototype.models = function(model, filter, callback, func) {
-    this.client.all(
-       {include_docs: true},
-       errorHandler(callback, function(res, cb) {
-          var docs = res.map(function(doc) {
-             return idealize(doc); 
-          });
-          var filtered = filtering(docs, model, filter, this._models)
-          func ? func(filtered, cb) : cb(filtered);
-       }.bind(this))
-    );
+    var limit = 200;
+    var skip  = 0;
+    if (filter != null) {
+        limit = filter.limit || limit;
+        skip  = filter.skip ||skip;
+    }
+
+    var self = this;
+
+    self.client.save('_design/'+model, {
+        views : {
+            all : {
+                map : 'function(doc) { if (doc.nature == "'+model+'") { emit(doc._id, doc); } }'
+            }
+        }
+    }, function() {
+        self.client.view(model+'/all', {include_docs:true, limit:limit, skip:skip}, errorHandler(callback, function(res, cb) {
+            var docs = res.map(function(doc) {
+                return idealize(doc);
+            });
+            var filtered = filtering(docs, model, filter, this._models)
+
+            func ? func(filtered, cb) : cb(filtered);
+        }.bind(self)));
+    });
 };
 
 CradleAdapter.prototype.all = function(model, filter, callback) {
