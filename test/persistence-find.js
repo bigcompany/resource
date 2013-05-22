@@ -65,7 +65,7 @@ function testDatasource(config) {
   });
 
   test("find creatures with id korben - with " + config.type + " datasource", function (t) {
-    creature.find({ where: { id: 'korben' }}, function (err, creatures) {
+    creature.find({ id: 'korben' }, function (err, creatures) {
       t.error(err, 'found creatures');
 
       t.equal(creatures.length, 1, 'found one creature');
@@ -74,7 +74,7 @@ function testDatasource(config) {
   });
 
   test("find creatures with life 10 - with " + config.type + " datasource", function (t) {
-    creature.find({ where: { life: 10 }}, function (err, creatures) {
+    creature.find({ life: 10 }, function (err, creatures) {
       t.error(err, 'found creatures');
 
       t.equal(creatures.length, 2, 'found two creatures');
@@ -83,7 +83,7 @@ function testDatasource(config) {
   });
 
   test("find creatures with type dragon - with " + config.type + " datasource", function (t) {
-    creature.find({ where: { type: 'dragon' }}, function (err, creatures) {
+    creature.find({ type: 'dragon' }, function (err, creatures) {
       t.error(err, 'found creatures');
 
       t.equal(creatures.length, 2, 'found two creatures');
@@ -92,7 +92,7 @@ function testDatasource(config) {
   });
 
   test("find creatures with life 10 and type dragon - with " + config.type + " datasource", function (t) {
-    creature.find({ where: { life: 10, type: 'dragon' }}, function (err, creatures) {
+    creature.find({ life: 10, type: 'dragon' }, function (err, creatures) {
       t.error(err, 'found creatures');
 
       t.equal(creatures.length, 1, 'found one creature');
