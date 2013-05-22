@@ -250,7 +250,7 @@ test("executing creature.all", function (t) {
 });
 
 test("persist creature to couchdb", function (t) {
-  creature.persist({ name: "big-test", type: "couchdb" });
+  creature.persist({ name: "big-test", type: "couchdb", options: { cache: false }});
   t.end();
 });
 
