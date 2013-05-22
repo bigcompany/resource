@@ -285,27 +285,29 @@ CradleAdapter.prototype.models = function(model, filter, callback, func) {
     var self = this;
 
     self.client.get('_design/'+model, function (err, _) {
-        if (!err) {
-            return filter();
-        }
-        if (err && err.error !== 'not_found') {
-            return callback(err);
+        if (err) {
+            if (err.error !== 'not_found') {
+                return callback(err);
+            }
+
+            return self.client.save('_design/'+model, {
+                views : {
+                    all : {
+                        map : 'function(doc) { if (doc.nature == "'+model+'") { emit(doc._id, doc); } }'
+                    }
+                }
+            }, _filter);
         }
 
-        self.client.save('_design/'+model, {
-            views : {
-                all : {
-                    map : 'function(doc) { if (doc.nature == "'+model+'") { emit(doc._id, doc); } }'
-                }
-            }
-        }, filter);
+        _filter();
     });
 
-    function filter() {
+    function _filter() {
         self.client.view(model+'/all', {include_docs:true, limit:limit, skip:skip}, errorHandler(callback, function(res, cb) {
             var docs = res.map(function(doc) {
                 return idealize(doc);
             });
+
             var filtered = filtering(docs, model, filter, this._models)
 
             func ? func(filtered, cb) : cb(filtered);
