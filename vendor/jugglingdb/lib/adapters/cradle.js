@@ -1,3 +1,5 @@
+var crypto = require('crypto');
+
 var safeRequire = require('../utils').safeRequire;
 
 /**
@@ -63,30 +65,6 @@ function synchronize(functions, args, callback) {
    }
 };
 
-function applyFilter(filter) {
-    if (typeof filter.where === 'function') {
-        return filter.where;
-    }
-    var keys = Object.keys(filter.where);
-    return function (obj) {
-        var pass = true;
-        keys.forEach(function (key) {
-            if (!test(filter.where[key], obj[key])) {
-                pass = false;
-            }
-        });
-        return pass;
-    }
-
-    function test(example, value) {
-        if (typeof value === 'string' && example && example.constructor.name === 'RegExp') {
-            return value.match(example);
-        }
-        // not strict equality
-        return example == value;
-    }
-}
-
 function numerically(a, b) {
    return a[this[0]] - b[this[0]];
 }
@@ -95,25 +73,7 @@ function literally(a, b) {
    return a[this[0]] > b[this[0]];
 }
 
-function filtering(res, model, filter, instance) {
-
-   if(model) {
-      if(filter == null) filter = {};
-      if(filter.where == null) filter.where = {};
-      filter.where.nature = model;
-   }
-
-   for(var p in filter) {
-     if (p !== 'where') {
-       filter.where[p] = filter[p];
-     }
-   }
-
-   // do we need some filtration?
-   if (filter.where) {
-      res = res ? res.filter(applyFilter(filter)) : res;
-   }
-
+function sorting(res, model, filter, instance) {
    // do we need some sorting?
    if (filter.order) {
       var props = instance[model].properties;
@@ -274,6 +234,7 @@ CradleAdapter.prototype.count = function(model, callback, where) {
     );
 };
 
+var views = {};
 CradleAdapter.prototype.models = function(model, filter, callback, func) {
     var limit = 200;
     var skip  = 0;
@@ -284,34 +245,145 @@ CradleAdapter.prototype.models = function(model, filter, callback, func) {
 
     var self = this;
 
-    _filter(function (err, res) {
-        if (err && err.error === 'not_found') {
-            return self.client.save('_design/'+model, {
-                views : {
-                    all : {
-                        map : 'function(doc) { if (doc.nature == "'+model+'") { emit(doc._id, doc); } }'
+    if(model) {
+       if(filter == null) filter = {};
+       if(filter.where == null) filter.where = {};
+       filter.where.nature = model;
+    }
+
+    if (filter.where.id) {
+      filter.where.id = model + '/' + filter.where.id;
+    }
+
+    _view(model, filter, errorHandler(callback, function(res, cb) {
+        var docs = res.map(function(doc) {
+            return idealize(doc);
+        });
+
+        var sorted = sorting(docs, model, filter, this._models)
+
+        func ? func(sorted, cb) : cb(sorted);
+    }.bind(self)));
+
+    function _view(model, filter, callback) {
+        var view = getView(model, filter);
+
+        self.client.view(model+'/'+view.name, {include_docs:true, limit:limit, skip:skip}, function (err, res) {
+            if (err && err.error === 'not_found') {
+
+                return self.client.save('_design/'+model, {
+                    views: getViews(model)
+                }, function (err) {
+                    if (err) {
+                        return callback(err);
                     }
-                }
-            }, function (err) {
-              if (err) {
+                    _view(model, filter, callback);
+                });
                 return callback(err);
-              }
-              _filter(callback);
-            });
+            }
+
+            callback(null, res);
+        });
+
+    }
+
+    function getView(model, filter) {
+        var name,
+            fxn;
+
+        if (typeof filter.where === 'function') {
+            if (filter.where.name) {
+                name = filter.where.name;
+            }
+            else {
+                name = md5(filter.where.toString());
+            }
         }
-        callback(err, res);
-    });
 
-    function _filter(callback) {
-        self.client.view(model+'/all', {include_docs:true, limit:limit, skip:skip}, errorHandler(callback, function(res, cb) {
-            var docs = res.map(function(doc) {
-                return idealize(doc);
-            });
+        if (filter.name) {
+          name = filter.name;
+        }
 
-            var filtered = filtering(docs, model, filter, this._models)
+        var keys = Object.keys(filter.where);
 
-            func ? func(filtered, cb) : cb(filtered);
-        }.bind(self)));
+        if (keys.length === 1 && keys.indexOf('nature') !== -1) {
+            name = 'all';
+        }
+
+        if (!name) {
+            name = md5(JSON.stringify(filter.where));
+        }
+
+        // this is not the most readable way to generate unique one-way ids
+        function md5(str) {
+            return crypto
+                .createHash('md5')
+                .update(str)
+                .digest('hex')
+            ;
+        }
+
+        if (views[name]) {
+          return {name:name, model:model, view:views[name]};
+        }
+        var view = {
+            name: name,
+            model:model,
+            view: getMap(filter)
+        };
+
+        views[name] = view;
+
+        return view;
+    }
+
+    function getMap(filter) {
+        if (typeof filter.where === 'function') {
+            // function (doc) with emit() calls
+            return filter.where.toString();
+        }
+
+        return [
+            "function (doc) {",
+            "    var pass = true;",
+            "    var where = "+JSON.stringify(filter.where)+";",
+            "",
+            "    Object.keys(where).forEach(function (key) {",
+            "        if (!test(where[key], doc[key])) {",
+            "            pass = false;",
+            "        }",
+            "        function test(example, value) {",
+                        // Couch doesn't have an obvious way to send regexp "examples"
+                        /*
+                        if (typeof value === 'string' && example && example.constructor.name === 'RegExp') {
+                            return value.match(example);
+                        }
+                        */
+
+            "            // not strict equality",
+            "            return example == value;",
+            "        }",
+            "",
+            "    });",
+            "    if (pass) {",
+            "        emit(doc._id, doc);",
+            "    }",
+            "};"
+        ].join('\n');
+    }
+
+    function getViews(model) {
+        var vs = {};
+
+        Object.keys(views).forEach(function (k) {
+            var v = views[k];
+
+            if (v.model === model) {
+                vs[v.name] = { map: v.view };
+            }
+        });
+
+        return vs;
     }
 };
 
