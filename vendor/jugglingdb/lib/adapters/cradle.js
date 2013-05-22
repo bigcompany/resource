@@ -284,13 +284,24 @@ CradleAdapter.prototype.models = function(model, filter, callback, func) {
 
     var self = this;
 
-    self.client.save('_design/'+model, {
-        views : {
-            all : {
-                map : 'function(doc) { if (doc.nature == "'+model+'") { emit(doc._id, doc); } }'
-            }
+    self.client.get('_design/'+model, function (err, _) {
+        if (!err) {
+            return filter();
         }
-    }, function() {
+        if (err && err.error !== 'not_found') {
+            return callback(err);
+        }
+
+        self.client.save('_design/'+model, {
+            views : {
+                all : {
+                    map : 'function(doc) { if (doc.nature == "'+model+'") { emit(doc._id, doc); } }'
+                }
+            }
+        }, filter);
+    });
+
+    function filter() {
         self.client.view(model+'/all', {include_docs:true, limit:limit, skip:skip}, errorHandler(callback, function(res, cb) {
             var docs = res.map(function(doc) {
                 return idealize(doc);
@@ -299,7 +310,7 @@ CradleAdapter.prototype.models = function(model, filter, callback, func) {
 
             func ? func(filtered, cb) : cb(filtered);
         }.bind(self)));
-    });
+    }
 };
 
 CradleAdapter.prototype.all = function(model, filter, callback) {
