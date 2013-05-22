@@ -31,7 +31,7 @@ test("load creature resource - with memory datasource", function (t) {
 
 testDatasource({ type: 'memory' });
 testDatasource({ type: 'fs' });
-testDatasource({ type: 'couch', database: 'big-test' });
+testDatasource({ type: 'couch', name: 'big-test' });
 
 function testDatasource(config) {
 
