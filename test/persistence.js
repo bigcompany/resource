@@ -301,7 +301,11 @@ test("modify persisted documents outside of jugglingdb", function (t) {
             t.doesNotThrow(function () {
               t.equal(korben.life, 50, 'korben has life 50');
             }, 'korben is an object');
-            t.end();
+
+            creature.destroy(korben.id, function (err) {
+              t.error(err, 'korben was destroyed');
+              t.end();
+            });
           });
         });
       });
