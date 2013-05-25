@@ -118,6 +118,13 @@
       find: function(cond, cb) {
         var _this = this;
         return fs.readdir(this.dir, function(err, files) {
+          if (err) {
+            if (err.code === 'ENOENT') {
+              return cb(null, []);
+            }
+            return cb(err);
+          }
+
           return async.map(files, function(file, callback) {
             return _this.get(path.basename(file, '.json'), function(err, data) {
               if (_this.satisfy(data, cond)) {
