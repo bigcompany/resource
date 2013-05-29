@@ -43,6 +43,9 @@
         return onto;
       },
       satisfy: function(data, cond) {
+        if (!cond) {
+          return true;
+        }
         return Object.keys(cond).every(function(k) {
           if (data[k] === cond[k]) {
             return true;
