@@ -168,7 +168,7 @@ resource.define = function (name, options) {
     // If no method exists on the resource yet create a place holder,
     // in order to be able to lazily define hooks on methods that dont exist yet
     //
-    if(typeof r.methods[method] === 'undefined') {
+    if (typeof r.methods[method] === 'undefined') {
       r.methods[method] = {};
       r.methods[method].before = [];
       r.methods[method].after = [];
@@ -187,7 +187,7 @@ resource.define = function (name, options) {
     // If no method exists on the resource yet create a place holder,
     // in order to be able to lazily define hooks on methods that dont exist yet
     //
-    if(typeof r.methods[method] === 'undefined') {
+    if (typeof r.methods[method] === 'undefined') {
       r.methods[method] = {};
       r.methods[method].before = [];
       r.methods[method].after = [];
@@ -259,7 +259,7 @@ resource.installDeps = function (r) {
   //
   var _command = ["install"];
 
-  Object.keys(r.dependencies).forEach(function(dep){
+  Object.keys(r.dependencies).forEach(function (dep) {
     var resourcePath;
 
     //
@@ -271,7 +271,7 @@ resource.installDeps = function (r) {
     try {
       require.resolve(resourcePath);
     } catch (err) {
-      logger.warn(r.name.magenta + ' resource is missing a required dependency: ' + dep.yellow)
+      logger.warn(r.name.magenta + ' resource is missing a required dependency: ' + dep.yellow);
       // TODO: check to see if dep is already in the process of being installed,
       // if so, don't attempt to install it twice
       if (typeof resource.installing[dep] === 'undefined') {
@@ -282,7 +282,7 @@ resource.installDeps = function (r) {
 
   });
 
-  if(_command.length === 1) {
+  if (_command.length === 1) {
     return;
   }
 
@@ -294,7 +294,7 @@ resource.installDeps = function (r) {
   //
   // Spawn npm as child process to perform installation
   //
-  logger.warn('spawning ' + 'npm'.grey + ' to install missing dependencies')
+  logger.warn('spawning ' + 'npm'.grey + ' to install missing dependencies');
   logger.exec('npm ' + _command.join(' '));
 
   //
@@ -315,7 +315,7 @@ resource.installDeps = function (r) {
     process.stderr.write(data);
   });
 
-  npm.on('error', function(){
+  npm.on('error', function () {
     logger.error('npm installation error!');
     process.exit();
   });
@@ -327,14 +327,14 @@ resource.installDeps = function (r) {
       logger.help('try running this command again with sudo');
       process.exit(3);
     }
-    _command.forEach(function(c, i){
-      if(i !== 0) { // the first command is "install"
+    _command.forEach(function (c, i) {
+      if (i !== 0) { // the first command is "install"
         var dep = c.split('@'); // split the dep name based on packagename@semver syntax
         dep = dep[0]; // take the package name
         delete resource.installing[dep]; // remove it from the list of installing packages
       }
     });
-    if(Object.keys(resource.installing).length === 0) {
+    if (Object.keys(resource.installing).length === 0) {
       logger.info('npm installation complete');
       logger.warn('now executing ' + resource._queue.length + ' defferred call(s)');
 
@@ -346,7 +346,7 @@ resource.installDeps = function (r) {
       var length = resource._queue.length,
           m;
 
-      for(m = 0; m < length; m++) {
+      for (m = 0; m < length; m++) {
         resource._queue.pop()();
       }
     }
@@ -362,11 +362,11 @@ var instantiate = resource.instantiate = function (schema, levelData) {
 
   levelData = levelData || {};
 
-  if(typeof schema.properties === 'undefined') {
+  if (typeof schema.properties === 'undefined') {
     return obj;
   }
 
-  Object.keys(schema.properties).forEach(function(prop, i){
+  Object.keys(schema.properties).forEach(function (prop, i) {
 
     if (typeof schema.properties[prop].default !== 'undefined') {
       obj[prop] = schema.properties[prop].default;
@@ -384,12 +384,12 @@ var instantiate = resource.instantiate = function (schema, levelData) {
 
   return obj;
 
-}
+};
 
 //
 // Attachs a method onto a resources as a named function with optional schema and tap
 //
-function addMethod (r, name, method, schema, tap) {
+function addMethod(r, name, method, schema, tap) {
 
   //
   // Create a new method that will act as a wrap for the passed in "method"
@@ -400,7 +400,7 @@ function addMethod (r, name, method, schema, tap) {
         validationError;
 
     var payload = [],
-        callback = args[args.length -1];
+        callback = args[args.length - 1];
 
     //
     // Determine if a exports.dependencies hash has been specified in the resource,
@@ -412,7 +412,7 @@ function addMethod (r, name, method, schema, tap) {
 
 
     if (Object.keys(resource.installing).length > 0) {
-      resource._queue.unshift(function(){
+      resource._queue.unshift(function () {
         fn.apply(this, args);
       });
       logger.warn('deffering execution of `' + (r.name + '.' + name).yellow + '` since dependencies are missing');
@@ -448,7 +448,7 @@ function addMethod (r, name, method, schema, tap) {
     // Check for any beforeAll hooks,
     // if they exist, execute them in LIFO order
     //
-    function beforeAllHooks (cb) {
+    function beforeAllHooks(cb) {
       var hooks;
       if (Array.isArray(resource.before) && resource.before.length > 0) {
         hooks = resource.before.slice();
@@ -544,7 +544,7 @@ function addMethod (r, name, method, schema, tap) {
         //
         //
         if (typeof schema.properties === "object") {
-          Object.keys(schema.properties).forEach(function(prop,i){
+          Object.keys(schema.properties).forEach(function (prop, i) {
             _data[prop] = args[i];
           });
         }
@@ -591,7 +591,7 @@ function addMethod (r, name, method, schema, tap) {
         //
         // Convert schema data back into arguments array
         //
-        if(Object.keys(_instance).length === 0) {
+        if (Object.keys(_instance).length === 0) {
           _args = args;
         }
 
@@ -601,8 +601,8 @@ function addMethod (r, name, method, schema, tap) {
         // make sure to add back those additional arguments
         //
 
-        Object.keys(_instance).forEach(function(item){
-          if(item !== 'callback') {
+        Object.keys(_instance).forEach(function (item) {
+          if (item !== 'callback') {
             _args.push(_instance[item]);
           }
         });
@@ -642,7 +642,7 @@ function addMethod (r, name, method, schema, tap) {
         //
         // Check to see if a callback was expected, but not provided.
         //
-        if(typeof schema.properties === 'object' && typeof schema.properties.callback === 'object' && typeof callback !== 'function') {
+        if (typeof schema.properties === 'object' && typeof schema.properties.callback === 'object' && typeof callback !== 'function') {
           //
           // If so, create a "dummy" callback so _method() won't crash
           //
@@ -670,12 +670,12 @@ function addMethod (r, name, method, schema, tap) {
         // If so, it is assumed the method signature follows the node.js,
         // convention of the last argument being a callback andd will be added to the end of the array
         //
-        if(typeof callback === 'function') {
+        if (typeof callback === 'function') {
           //
           // If a callback already exists as the last argument,
           // remove it
           //
-          if(typeof _args[_args.length - 1] === "function") {
+          if (typeof _args[_args.length - 1] === "function") {
             _args.pop();
           }
           //
@@ -687,17 +687,17 @@ function addMethod (r, name, method, schema, tap) {
         }
       } else {
         _args = args;
-        if(typeof callback === "function") {
+        if (typeof callback === "function") {
           //
           // Replace the original callback with the new wrapped callback
           //
-          _args[_args.length -1] = function (err, result) {
+          _args[_args.length - 1] = function (err, result) {
             return callbackWrap.apply(this, arguments);
           };
         }
       }
 
-      function callbackWrap (err, result) {
+      function callbackWrap(err, result) {
         var argv = [].slice.call(arguments);
 
         //
@@ -729,7 +729,7 @@ function addMethod (r, name, method, schema, tap) {
       //
       var result = method.apply(this, _args);
 
-      if(typeof callback !== 'function') {
+      if (typeof callback !== 'function') {
         resource.emit(r.name + '::' + name, result);
       }
 
@@ -742,7 +742,7 @@ function addMethod (r, name, method, schema, tap) {
     //
     // Executes "after" hooks in FIFO (First-In-First-Out) Order
     //
-    function afterHooks (args, cb) {
+    function afterHooks(args, cb) {
       var hooks;
       if (Array.isArray(fn.after) && fn.after.length > 0) {
         hooks = fn.after.slice();
@@ -791,14 +791,14 @@ function addMethod (r, name, method, schema, tap) {
   // This is used to allow the ability to define hooks on,
   // lazily defined resource methods
   //
-  if(typeof r.methods[name] !== 'undefined') {
-    if (Array.isArray(r.methods[name].before)){
-      r.methods[name].before.forEach(function(b){
+  if (typeof r.methods[name] !== 'undefined') {
+    if (Array.isArray(r.methods[name].before)) {
+      r.methods[name].before.forEach(function (b) {
         fn.before.push(b);
       });
     }
-    if (Array.isArray(r.methods[name].after)){
-      r.methods[name].after.forEach(function(b){
+    if (Array.isArray(r.methods[name].after)) {
+      r.methods[name].after.forEach(function (b) {
         fn.after.push(b);
       });
     }
@@ -817,12 +817,12 @@ function addMethod (r, name, method, schema, tap) {
 
 }
 
-function addProperty (r, name, schema) {
+function addProperty(r, name, schema) {
 
   if (typeof schema === 'undefined') {
     schema = {
       "type": "string"
-    }
+    };
   }
 
   r.schema.properties[name] = schema;
@@ -852,19 +852,19 @@ resource.invoke = function (method, data, callback) {
   //
   // If any data was passed in
   //
-  if(Object.keys(data).length > 0) {
+  if (Object.keys(data).length > 0) {
 
     //
     // If an options hash is expected as part of the resource method schema
     //
-    if(method.schema.properties.options) {
+    if (method.schema.properties.options) {
       result = method.call(this, data, callback);
     } else {
       //
       // If no options hash is expected, curry the arguments left to right into an array
       //
       var args = [];
-      for(var p in data) {
+      for (var p in data) {
         args.push(data[p]);
       }
       args.push(callback);
@@ -881,8 +881,8 @@ resource.invoke = function (method, data, callback) {
   // Remark: If the resource method returns a value this indicates method is sync,
   // and that the continuation must be manually called with no error condition
   //
-  if(typeof result !== 'undefined') {
-    return callback(null, result)
+  if (typeof result !== 'undefined') {
+    return callback(null, result);
   }
 
 };
@@ -902,12 +902,12 @@ resource.toJSON = function (r) {
     name: r.name,
     schema: r.schema,
     methods: methods(r)
-  }
+  };
 
-  function methods (r) {
+  function methods(r) {
     var obj = {};
-    for(var m in r.methods) {
-      obj[m] = r.methods[m].schema
+    for (var m in r.methods) {
+      obj[m] = r.methods[m].schema;
     }
     return obj;
   }
@@ -923,34 +923,34 @@ resource.schema = {
 // Create logger resource
 //
 
-  var _logger = resource.define('logger');
-  _logger.schema.description = "a simple STDOUT based logger";
-  _logger.method("log", logger.log, {
-    "description": "logs data to STDOUT",
-    "properties": {
-      "level": {
-        "type": "string",
-        "default": "info"
-      },
-      "message": {
-        "type": "any"
-      }
+var _logger = resource.define('logger');
+_logger.schema.description = "a simple STDOUT based logger";
+_logger.method("log", logger.log, {
+  "description": "logs data to STDOUT",
+  "properties": {
+    "level": {
+      "type": "string",
+      "default": "info"
+    },
+    "message": {
+      "type": "any"
     }
-  });
-
-  //
-  // Override original logger with new logger resource
-  // TODO: cleanup override logic
-  resource.logger = _logger;
-
-  //
-  // Preserve old logging levels
-  //
-  for(var level in logger.levels) {
-    resource.logger[level] = logger[level];
   }
+});
 
-  resource.logger.put = logger.put;
+//
+// Override original logger with new logger resource
+// TODO: cleanup override logic
+resource.logger = _logger;
+
+//
+// Preserve old logging levels
+//
+for (var level in logger.levels) {
+  resource.logger[level] = logger[level];
+}
+
+resource.logger.put = logger.put;
 
 //
 // end logger resource
