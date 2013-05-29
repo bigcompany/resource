@@ -2,18 +2,18 @@
 
 ## Purpose
 
-The resource library provides an easy way to define schema for JavaScript objects and JavaScript function definitions. Through creating resources, the developer is freed from having to write the same validation and interface boiler-plate code over and over again. Resources are friendly to use and highly introspect-able allowing for very easy reflection.
+A library to create resources. A resource can be consider a combination of a Model and Controller. Through creating resources the developer is freed from having to write the same validation and interface boiler-plate code over and over again. If persistence is enabled resources can be instantiable and stored to a datasource. The structure of a resource is highly introspect-able allowing for easy reflection across a variety of [robust interfaces](http://github.com/bigcompany/resources).
 
 ## Features
 
- - Simple API
- - Resources can persist to multiple datasource types ( Memory / Couch / FS / Mongo / etc..)
+ - Easy to use API
  - Provides validation and schema for JavaScript Objects and Functions
  - Resources are highly introspect-able
- - Built-in hook system for resource methods
+ - Resources can persist to multiple datasource types ( Memory / Couch / FS / Mongo / etc..)
+ - Built-in hooking system for resource methods
+ - JSON-Schema compatible
  - Resources can be CommonJS Modules
  - Resources support NPM dependencies with lazy installs and resource method deferment
- - JSON-Schema compatible
  - Large library of [pre-built resources](http://github.com/bigcompany/resources) available
 
 ## Installation
