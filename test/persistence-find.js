@@ -11,29 +11,22 @@ test("load resource module", function (t) {
 });
 
 test("load creature resource - with memory datasource", function (t) {
-  creature = resource.use('creature');
-
-  t.type(creature.config, 'object', 'configuration defined - creature.config is object');
-
-  t.type(creature.methods, 'object', 'methods defined - creature.methods is object');
-  t.type(creature.methods.create, 'function', 'methods defined - methods.create is function');
-  t.type(creature.methods.get, 'function', 'methods defined - methods.get is function');
-  t.type(creature.methods.find, 'function', 'methods defined - methods.find is function');
-  t.type(creature.methods.destroy, 'function', 'methods defined - methods.destroy is function');
-
-  t.type(creature.create, 'function', 'methods hoisted - creature.create is function');
-  t.type(creature.get, 'function', 'methods hoisted - creature.get is function');
-  t.type(creature.find, 'function', 'methods hoisted - creature.find is function');
-  t.type(creature.destroy, 'function', 'methods hoisted - creature.destroy is function');
-
+  creature = resource.define('creature');
+  creature.property('type');
+  creature.property('life', { type: 'number'});
   t.end()
 });
 
 testDatasource({ type: 'memory' });
 testDatasource({ type: 'fs' });
-testDatasource({ type: 'couch', name: 'big-test' });
 
-function testDatasource(config) {
+//
+// TODO: add feature detection / better test configuration for testing diffirent datasources
+// If a user attempts to run the couch tests without a running couch, they will error with a non-descript message
+//
+// testDatasource({ type: 'couch', name: 'big-test' });
+
+function testDatasource (config) {
 
   var creatures = [
     { id: 'korben', life: 10, type: 'dragon' },
