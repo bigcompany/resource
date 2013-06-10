@@ -642,7 +642,7 @@ function addMethod(r, name, method, schema, tap) {
         //
         // Check to see if a callback was expected, but not provided.
         //
-        if (typeof schema.properties === 'object' && typeof schema.properties.callback === 'object' && typeof callback !== 'function') {
+        if (typeof schema.properties === 'object' && typeof schema.properties.callback === 'object' && typeof callback !== 'function' && schema.properties.callback.required) {
           //
           // If so, create a "dummy" callback so _method() won't crash
           //
@@ -678,20 +678,20 @@ function addMethod(r, name, method, schema, tap) {
           if (typeof _args[_args.length - 1] === "function") {
             _args.pop();
           }
-          //
-          // Add the wrapped callback as the last argument
-          //
           _args.push(function () {
+            //
+            // Add the wrapped callback as the last argument
+            //
             return callbackWrap.apply(this, arguments);
           });
         }
       } else {
         _args = args;
         if (typeof callback === "function") {
-          //
-          // Replace the original callback with the new wrapped callback
-          //
           _args[_args.length - 1] = function (err, result) {
+            //
+            // Replace the original callback with the new wrapped callback
+            //
             return callbackWrap.apply(this, arguments);
           };
         }
