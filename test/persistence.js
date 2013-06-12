@@ -28,6 +28,22 @@ test("load resource module", function (t) {
   t.end();
 });
 
+//
+// A simple data object to use for testing resource properties of type "object"
+//
+var data = {
+  "foo": "bar",
+  "abc": 123,
+  "data" : {
+    "prop1" : "foo",
+    "prop2" : "bar"
+  }
+},
+items = [
+  { "foo": "bar" },
+  { "abc": 123 }
+];
+
 test("define creature resource - with datasource config", function (t) {
   creature = resource.define('creature', { config: { datasource: testDatasource }});
 
@@ -92,6 +108,12 @@ test("define space resource - with datasource config", function(t) {
     default: {}
   });
 
+  space.property('metadata', {
+    description: 'additional metadata',
+    type: 'object',
+    default: data
+  });
+
   t.type(space.config, 'object', 'configuration defined - space.config is object');
   t.equal(testDatasource, space.config.datasource, ('configuration defined - space.config.datasource == "' + testDatasource + '"'));
 
@@ -108,22 +130,6 @@ test("define space resource - with datasource config", function(t) {
 
   t.end();
 });
-
-//
-// A simple data object to use for testing resource properties of type "object"
-//
-var data = {
-  "foo": "bar",
-  "abc": 123,
-  "data" : {
-    "prop1" : "foo",
-    "prop2" : "bar"
-  }
-},
-items = [
-  { "foo": "bar" },
-  { "abc": 123 }
-];
 
 test("executing creature.all", function (t) {
   creature.all(function(err, result){
@@ -278,12 +284,14 @@ test("add creature to space", function(t) {
   space.get('big', function(err, _space) {
     t.type(err, 'null', 'no error');
     _space.resources['creature'] = ['bobby'];
+    _space.metadata.foo = "tar";
     _space.save(function(err, result) {
       t.type(err, 'null', 'no error');
       t.type(result, 'object', 'space instance is object');
       t.type(result.id, 'string', 'space instance id is string');
       t.equal(result.id, 'big', 'space instance id is correct');
       t.type(result.resources, 'object', 'space instance resources is object');
+      t.equal(result.metadata.foo, 'tar', 'metadata property saved');
       t.equal(result.resources.creature.length, 1, 'space instance resources is correct');
       t.equal(result.resources.creature[0], 'bobby', 'space instance resources is correct');
       t.end();
@@ -298,6 +306,7 @@ test("create another new space", function(t) {
     t.type(result.id, 'string', 'space instance id is string');
     t.equal(result.id, 'big2', 'space instance id is correct');
     t.type(result.resources, 'object', 'space instance resources is object');
+    t.equal(result.metadata.foo, 'bar', 'default metadata preserved');
     t.equal(isEmpty(result.resources), true, 'space instance resources is empty');
     t.end();
   });
