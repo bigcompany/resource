@@ -20,8 +20,7 @@ var colors = require('colors');
 //
 // Require a simple JSON-Schema validator
 //
-var validator = require('./vendor/validator');
-
+var validator = resource.validator = require('./vendor/validator');
 var helper = resource.helper = require('./lib/helper');
 var logger = resource.logger = require('./lib/logger');
 var persistence = resource.persistence = require('./lib/persistence');
