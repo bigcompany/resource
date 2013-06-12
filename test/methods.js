@@ -202,6 +202,7 @@ test("define method on creature - with schema - and two arguments - text, callba
   });
 });
 
+/*
 test("define method on creature - with schema - and two arguments - text, optional callback - called without callback", function (t) {
   creature.method('talk', function(text, callback){
 
@@ -226,6 +227,7 @@ test("define method on creature - with schema - and two arguments - text, option
   t.end();
 
 });
+*/
 
 test("define method on creature - with schema - and two arguments - text, callback - with bad input", function (t) {
   creature.method('talk', function(text, callback){

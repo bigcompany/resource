@@ -648,7 +648,7 @@ function addMethod(r, name, method, schema, tap) {
         //
         // Check to see if a callback was expected, but not provided.
         //
-        if (typeof schema.properties === 'object' && typeof schema.properties.callback === 'object' && typeof callback !== 'function' && schema.properties.callback.required) {
+        if (typeof schema.properties === 'object' && typeof schema.properties.callback === 'object' && typeof callback !== 'function') {
           //
           // If so, create a "dummy" callback so _method() won't crash
           //
