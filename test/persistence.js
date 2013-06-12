@@ -6,14 +6,26 @@ var tap = require("tap")
   , resource;
 
 //
+// Utility testing functions
+//
+function isEmpty(o){
+  for(var i in o){
+      if(o.hasOwnProperty(i)){
+          return false;
+      }
+  }
+  return true;
+}
+
+//
 // Testing metadata
 //
 var testDatasource = "memory";
 
 test("load resource module", function (t) {
   resource = require('../');
-  t.ok(resource, "object loaded")
-  t.end()
+  t.ok(resource, "object loaded");
+  t.end();
 });
 
 test("define creature resource - with datasource config", function (t) {
@@ -45,7 +57,7 @@ test("define creature resource - with datasource config", function (t) {
   t.type(creature.find, 'function', 'methods hoisted - creature.find is function');
   t.type(creature.destroy, 'function', 'methods hoisted - creature.destroy is function');
 
-  t.end()
+  t.end();
 });
 
 test("define account resource - with datasource config", function (t) {
@@ -62,7 +74,39 @@ test("define account resource - with datasource config", function (t) {
   t.type(account.config, 'object', 'configuration defined - account.config is object');
   t.equal(testDatasource, account.config.datasource, ('configuration defined - account.config.datasource == "' + testDatasource + '"'));
 
-  t.end()
+  t.end();
+});
+
+test("define space resource - with datasource config", function(t) {
+  space = resource.define('space', { config: { datasource: testDatasource }});
+
+  space.property('id', {
+    description: 'the name of the space',
+    type: 'string',
+    required: true
+  });
+
+  space.property('resources', {
+    description: 'the resources present in this space',
+    type: 'object',
+    default: {}
+  });
+
+  t.type(space.config, 'object', 'configuration defined - space.config is object');
+  t.equal(testDatasource, space.config.datasource, ('configuration defined - space.config.datasource == "' + testDatasource + '"'));
+
+  t.type(space.methods, 'object', 'methods defined - space.methods is object');
+  t.type(space.methods.create, 'function', 'methods defined - methods.create is function');
+  t.type(space.methods.get, 'function', 'methods defined - methods.get is function');
+  t.type(space.methods.find, 'function', 'methods defined - methods.find is function');
+  t.type(space.methods.destroy, 'function', 'methods defined - methods.destroy is function');
+
+  t.type(space.create, 'function', 'methods hoisted - space.create is function');
+  t.type(space.get, 'function', 'methods hoisted - space.get is function');
+  t.type(space.find, 'function', 'methods hoisted - space.find is function');
+  t.type(space.destroy, 'function', 'methods hoisted - space.destroy is function');
+
+  t.end();
 });
 
 //
@@ -218,6 +262,64 @@ test("executing account.create with same id as a creature", function (t) {
   });
 });
 
+test("creating a space", function(t) {
+  space.create({id: "big"}, function(err, result) {
+    t.type(err, 'null', 'no error');
+    t.type(result, 'object', 'space instance is object');
+    t.type(result.id, 'string', 'space instance id is string');
+    t.equal(result.id, 'big', 'space instance id is correct');
+    t.type(result.resources, 'object', 'space instance resources is object');
+    t.equal(isEmpty(result.resources), true, 'space instance resources is empty');
+    t.end();
+  });
+});
+
+test("add creature to space", function(t) {
+  space.get('big', function(err, _space) {
+    t.type(err, 'null', 'no error');
+    _space.resources['creature'] = ['bobby'];
+    _space.save(function(err, result) {
+      t.type(err, 'null', 'no error');
+      t.type(result, 'object', 'space instance is object');
+      t.type(result.id, 'string', 'space instance id is string');
+      t.equal(result.id, 'big', 'space instance id is correct');
+      t.type(result.resources, 'object', 'space instance resources is object');
+      t.equal(result.resources.creature.length, 1, 'space instance resources is correct');
+      t.equal(result.resources.creature[0], 'bobby', 'space instance resources is correct');
+      t.end();
+    });
+  });
+});
+
+test("create another new space", function(t) {
+  space.create({id: "big2"}, function(err, result) {
+    t.type(err, 'null', 'no error');
+    t.type(result, 'object', 'space instance is object');
+    t.type(result.id, 'string', 'space instance id is string');
+    t.equal(result.id, 'big2', 'space instance id is correct');
+    t.type(result.resources, 'object', 'space instance resources is object');
+    t.equal(isEmpty(result.resources), true, 'space instance resources is empty');
+    t.end();
+  });
+});
+
+test("executing space.destroy", function (t) {
+  t.plan(2);
+  space.destroy('big', function(err, result){
+    t.type(result, 'null', 'destroyed space big');
+  });
+  space.destroy('big2', function(err, result){
+    t.type(result, 'null', 'destroyed space big2');
+  });
+});
+
+test("executing space.all", function (t) {
+  space.all(function(err, result){
+    t.equal(result.length, 0, 'no spaces');
+    t.end();
+  });
+});
+
 test("executing creature.destroy", function (t) {
   t.plan(2);
   creature.destroy('bobby', function(err, result){
@@ -249,7 +351,10 @@ test("executing creature.all", function (t) {
   });
 });
 
+
+/*
 test("persist creature to couchdb", function (t) {
   creature.persist({ name: "big-test", type: "couchdb", options: { cache: false }});
   t.end();
 });
+*/
