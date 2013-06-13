@@ -23,7 +23,6 @@ var colors = require('colors');
 var validator = resource.validator = require('./vendor/validator');
 var helper = resource.helper = require('./lib/helper');
 var logger = resource.logger = require('./lib/logger');
-var persistence = resource.persistence = require('./lib/persistence');
 resource.load = require('./lib/load');
 resource.use = require('./lib/use');
 resource.async = require('async');
@@ -34,9 +33,6 @@ resource.async = require('async');
 resource.env = process.env.NODE_ENV || 'development';
 
 resource.isResource = resource.helper.isResource;
-
-// map uuid creator onto resource as a convience
-resource.uuid = persistence.uuid;
 
 resource.installing = {};
 resource._queue = [];
@@ -201,7 +197,8 @@ resource.define = function (name, options) {
     r.schema.properties.id = {
       "type": "any"
     };
-    persistence.enable(r, r.config.datasource);
+    resource.use('persistence');
+    resource.persistence.enable(r, r.config.datasource);
   }
 
   //
@@ -215,7 +212,8 @@ resource.define = function (name, options) {
   r.persist = function (datasource) {
     datasource = datasource || 'memory';
     r.config.datasource = datasource;
-    persistence.enable(r, datasource);
+    resource.use('persistence');
+    resource.persistence.enable(r, datasource);
   };
 
 
@@ -836,8 +834,8 @@ function addProperty(r, name, schema) {
   // When adding new properties to a resource,
   // create an updated JugglingDB Model
   //
-  if (typeof r.config.datasource !== 'undefined') {
-    persistence.enable(r, r.config.datasource);
+  if (resource.persistence && typeof r.config.datasource !== 'undefined') {
+    resource.persistence.enable(r, r.config.datasource);
   }
 }
 
