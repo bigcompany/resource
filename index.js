@@ -25,7 +25,6 @@ var helper = resource.helper = require('./lib/helper');
 var logger = resource.logger = require('./lib/logger');
 resource.load = require('./lib/load');
 resource.use = require('./lib/use');
-resource.async = require('async');
 
 //
 // Resource environment, either set to NODE_ENV or "development"
