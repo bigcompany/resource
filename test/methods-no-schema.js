@@ -30,10 +30,10 @@ test("define method on creature - with no schema - invoke with no args", functio
 });
 
 test("define method on creature - with no schema - invoke with callback", function (t) {
-  creature.method('poke', function(callback){
+  creature.method('poke', function (callback) {
     callback(null, 'poked');
   });
-  creature.poke(function(err, result){
+  creature.poke(function (err, result) {
     t.equal('poked', result, 'poked!');
     t.end()
   });
@@ -48,7 +48,7 @@ test("define method on creature - with no schema - invoke with string argument",
 });
 
 test("define method on creature - with no schema - invoke with two string arguments", function (t) {
-  creature.method('talk', function(text, person){
+  creature.method('talk', function (text, person) {
     return text + ':' + person;
   }, {});
   t.equal('hi:marak', creature.talk('hi', 'marak'), 'talked!');
@@ -56,10 +56,10 @@ test("define method on creature - with no schema - invoke with two string argume
 });
 
 test("define method on creature - with no schema - invoke with string and callback", function (t) {
-  creature.method('talk', function(text, callback){
+  creature.method('talk', function (text, callback) {
     callback(null, text);
   });
-  creature.talk('hi', function(err, result){
+  creature.talk('hi', function (err, result) {
     t.equal('hi', result, 'talked!');
     t.end()
   });
@@ -79,7 +79,7 @@ test("define method on creature - with no schema - invoke with options and callb
   creature.method('talk', function(options, callback){
     callback(null, options);
   });
-  creature.talk({ "at": "bobby", "when": "now" }, function(err, result){
+  creature.talk({ "at": "bobby", "when": "now" }, function (err, result) {
     t.equal(result.at, 'bobby', 'talked! - result.at == "bobby"');
     t.equal(result.when, 'now', 'talked! - result.when == "now"');
     t.end()

@@ -1,20 +1,19 @@
-var tap = require("tap")
-  , test = tap.test
-  , plan = tap.plan
-  , creature
-  , resource
-  , List = require("../vendor/jugglingdb/lib/list");
+var tap = require("tap"),
+    test = tap.test,
+    plan = tap.plan,
+    creature,
+    resource;
 
 test("load resource module", function (t) {
   resource = require('../');
-  t.ok(resource, "object loaded")
-  t.end()
+  t.ok(resource, "object loaded");
+  t.end();
 });
 
 test("define creature resource", function (t) {
   creature = resource.define('creature');
-  t.ok(creature, "creature resource defined")
-  t.end()
+  t.ok(creature, "creature resource defined");
+  t.end();
 });
 
 test("define method on creature - with no method", function (t) {
@@ -22,12 +21,12 @@ test("define method on creature - with no method", function (t) {
   try {
     creature.method('poke');
   } catch (err) {
-    t.ok(true, 'could not add poke')
+    t.ok(true, 'could not add poke');
   }
 });
 
 test("define method on creature - with schema - single text argument", function (t) {
-  creature.method('talk', function(text){
+  creature.method('talk', function (text) {
     return text;
   }, {
     "properties": {
@@ -37,11 +36,11 @@ test("define method on creature - with schema - single text argument", function 
     }
   });
   t.equal(creature.talk('hi'), 'hi', 'talked!');
-  t.end()
+  t.end();
 });
 
 test("define method on creature - with schema - and single text argument - with bad input", function (t) {
-  creature.method('talk', function(text){
+  creature.method('talk', function (text) {
     return text;
   }, {
     "properties": {
@@ -60,12 +59,12 @@ test("define method on creature - with schema - and single text argument - with 
       t.equal(err.errors[0].property, 'text', 'did not talk - result[0].attribute == "text"');
       t.equal(err.errors[0].actual, 'number', 'did not talk - result[0].actual == "number"');
     }, 'thrown error has array of validation errors');
-    t.end()
+    t.end();
   }
 });
 
 test("define method on creature - with schema - single text argument - with default", function (t) {
-  creature.method('talk', function(text){
+  creature.method('talk', function (text) {
     return text;
   }, {
     "properties": {
@@ -76,11 +75,11 @@ test("define method on creature - with schema - single text argument - with defa
     }
   });
   t.equal(creature.talk('hi'), 'hi', 'talked!');
-  t.end()
+  t.end();
 });
 
 test("define method on creature - with schema - and single text argument - with default - and no input", function (t) {
-  creature.method('talk', function(text){
+  creature.method('talk', function (text) {
     return text;
   }, {
     "properties": {
@@ -91,11 +90,11 @@ test("define method on creature - with schema - and single text argument - with 
     }
   });
   t.equal(creature.talk(), 'hello', 'talked!');
-  t.end()
+  t.end();
 });
 
 test("define method on creature - with schema - and two text arguments", function (t) {
-  creature.method('talk', function(text, person){
+  creature.method('talk', function (text, person) {
     return text + ':' + person;
   }, {
     "properties": {
@@ -108,11 +107,11 @@ test("define method on creature - with schema - and two text arguments", functio
     }
   });
   t.equal(creature.talk('hi', 'marak'), 'hi:marak', 'talked!');
-  t.end()
+  t.end();
 });
 
 test("define method on creature - with schema - and single boolean argument", function (t) {
-  creature.method('talk', function(mute){
+  creature.method('talk', function (mute) {
     return mute ? '' : 'hi';
   }, {
     "properties": {
@@ -122,11 +121,11 @@ test("define method on creature - with schema - and single boolean argument", fu
     }
   });
   t.equal(creature.talk(false), 'hi', 'talked!');
-  t.end()
+  t.end();
 });
 
 test("define method on creature - with schema - and single boolean argument - with bad input", function (t) {
-  creature.method('talk', function(mute){
+  creature.method('talk', function (mute) {
     return mute ? '' : 'hi';
   }, {
     "properties": {
@@ -141,16 +140,16 @@ test("define method on creature - with schema - and single boolean argument - wi
   }
   catch (err) {
     t.doesNotThrow(function () {
-    t.equal(err.errors[0].attribute, 'type', 'did not talk - result[0].attribute == "type"');
-    t.equal(err.errors[0].property, 'mute', 'did not talk - result[0].attribute == "mute"');
-    t.equal(err.errors[0].actual, 'string', 'did not talk - result[0].actual == "string"');
+      t.equal(err.errors[0].attribute, 'type', 'did not talk - result[0].attribute == "type"');
+      t.equal(err.errors[0].property, 'mute', 'did not talk - result[0].attribute == "mute"');
+      t.equal(err.errors[0].actual, 'string', 'did not talk - result[0].actual == "string"');
     }, 'thrown error has validation errors array');
     t.end();
   }
 });
 
 test("define method on creature - with schema - and one callback argument", function (t) {
-  creature.method('poke', function(callback){
+  creature.method('poke', function (callback) {
     return callback(null, 'poked!');
   }, {
     "properties": {
@@ -159,14 +158,14 @@ test("define method on creature - with schema - and one callback argument", func
       }
     }
   });
-  creature.poke(function(err, result){
+  creature.poke(function (err, result) {
     t.equal(result, 'poked!', 'poked!');
-    t.end()
+    t.end();
   });
 });
 
 test("define method on creature - with schema - and one callback argument with multiple arguments", function (t) {
-  creature.method('poke', function(callback){
+  creature.method('poke', function (callback) {
     return callback(null, 'poked!', 'second poke');
   }, {
     "properties": {
@@ -175,16 +174,16 @@ test("define method on creature - with schema - and one callback argument with m
       }
     }
   });
-  creature.poke(function(err, first_result, second_result){
+  creature.poke(function (err, first_result, second_result) {
     t.equal('poked!', first_result);
     t.equal('second poke', second_result);
-    t.ok(true, 'poked!')
-    t.end()
+    t.ok(true, 'poked!');
+    t.end();
   });
 });
 
 test("define method on creature - with schema - and two arguments - text, callback", function (t) {
-  creature.method('talk', function(text, callback){
+  creature.method('talk', function (text, callback) {
     return callback(null, text);
   }, {
     "properties": {
@@ -196,15 +195,15 @@ test("define method on creature - with schema - and two arguments - text, callba
       }
     }
   });
-  creature.talk('hi!', function(err, result){
+  creature.talk('hi!', function (err, result) {
     t.equal(result, 'hi!', 'talked!');
-    t.end()
+    t.end();
   });
 });
 
 /*
 test("define method on creature - with schema - and two arguments - text, optional callback - called without callback", function (t) {
-  creature.method('talk', function(text, callback){
+  creature.method('talk', function (text, callback) {
 
     if (callback) {
       return callback(null, text);
@@ -230,7 +229,7 @@ test("define method on creature - with schema - and two arguments - text, option
 */
 
 test("define method on creature - with schema - and two arguments - text, callback - with bad input", function (t) {
-  creature.method('talk', function(text, callback){
+  creature.method('talk', function (text, callback) {
     return callback(null, text);
   }, {
     "properties": {
@@ -242,16 +241,16 @@ test("define method on creature - with schema - and two arguments - text, callba
       }
     }
   });
-  creature.talk(123, function(err, result){
+  creature.talk(123, function (err, result) {
     t.equal(err.errors[0].attribute, 'type', 'did not talk - err.errors[0].attribute == "type"');
     t.equal(err.errors[0].property, 'text', 'did not talk - err.errors[0].attribute == "text"');
     t.equal(err.errors[0].actual, 'number', 'did not talk - err.errors[0].actual == "number"');
-    t.end()
+    t.end();
   });
 });
 
 test("define method on creature - with schema - and two arguments - options, callback", function (t) {
-  creature.method('fire', function(options, callback){
+  creature.method('fire', function (options, callback) {
     return callback(null, options);
   }, {
     "properties": {
@@ -275,16 +274,16 @@ test("define method on creature - with schema - and two arguments - options, cal
       }
     }
   });
-  creature.fire({ "direction": "up", "power": "HIGH" }, function(err, result){
+  creature.fire({ "direction": "up", "power": "HIGH" }, function (err, result) {
     t.equal(result.direction, 'up', 'fired! - result.direction == "up"');
     t.equal(result.power, 'HIGH', 'fired! - result.power == "HIGH"');
     t.equal(result.stun, false, 'fired! - result.stun == false');
-    t.end()
+    t.end();
   });
 });
 
 test("define method on creature - with number schema - and good input", function (t) {
-  creature.method('hit', function(damage, callback){
+  creature.method('hit', function (damage, callback) {
     damage++;
     return callback(null, damage);
   }, {
@@ -297,14 +296,14 @@ test("define method on creature - with number schema - and good input", function
       }
     }
   });
-  creature.hit(8999, function(err, result){
+  creature.hit(8999, function (err, result) {
     t.equal(result, 9000, 'hit for 9000!');
-    t.end()
+    t.end();
   });
 });
 
 test("define method on creature - with number schema - and bad input", function (t) {
-  creature.method('hit', function(damage, callback){
+  creature.method('hit', function (damage, callback) {
     damage++;
     return callback(null, damage);
   }, {
@@ -317,16 +316,16 @@ test("define method on creature - with number schema - and bad input", function 
       }
     }
   });
-  creature.hit("abc", function(err, result){
+  creature.hit("abc", function (err, result) {
     t.equal(err.errors[0].attribute, 'type', 'did not hit - err.errors[0].attribute = "type"');
     t.equal(err.errors[0].property, 'damage', 'did not hit - err.errors[0].property = "damage"');
     t.equal(err.errors[0].actual, 'string', 'did not hit - err.errors[0].actual = "string"');
-    t.end()
+    t.end();
   });
 });
 
 test("define method on creature - with required string schema - and bad input", function (t) {
-  creature.method('hit', function(target, callback){
+  creature.method('hit', function (target, callback) {
     return callback(null, target);
   }, {
     "properties": {
@@ -339,16 +338,16 @@ test("define method on creature - with required string schema - and bad input", 
       }
     }
   });
-  creature.hit("", function(err, result){
+  creature.hit("", function (err, result) {
     t.equal(err.errors[0].attribute, 'required', 'did not hit - err.errors[0].attribute = "required"');
     t.equal(err.errors[0].property, 'target', 'did not hit - err.errors[0].property = "target"');
     t.equal(err.errors[0].actual, '', 'did not hit - err.errors[0].actual = ""');
-    t.end()
+    t.end();
   });
 });
 
 test("define method on creature - with simple schema - and additional non-schema arguments", function (t) {
-  creature.method('talk', function (text, target){
+  creature.method('talk', function (text, target) {
     return { text: text, target: target };
   }, {
     "properties": {
@@ -360,7 +359,7 @@ test("define method on creature - with simple schema - and additional non-schema
   var result = creature.talk('hi', 'bob');
   t.equal(result.text, 'hi', 'talked! - result.text == "hi"');
   t.equal(result.target, 'bob', 'talked! - result.target == "bob"');
-  t.end()
+  t.end();
 });
 
 test("define method on creature - with object schema - and additional non-schema arguments", function (t) {
@@ -378,15 +377,15 @@ test("define method on creature - with object schema - and additional non-schema
       }
     }
   });
-  creature.talk({ text: 'hi', target: 'bob' }, function(err, result) {
+  creature.talk({ text: 'hi', target: 'bob' }, function (err, result) {
     t.equal(result.text, 'hi', 'talked! - result.text == "hi"');
     t.equal(result.target, 'bob', 'talked! - result.target == "bob"');
-    t.end()
+    t.end();
   });
 });
 
 test("define method on creature - with schema - and two arguments - options, number", function (t) {
-  creature.method('eat', function(options, n){
+  creature.method('eat', function (options, n) {
     return { food: options.food, amount: n };
   }, {
     "properties": {

@@ -29,7 +29,7 @@ test("adding a module-scoped Resource.beforeAll(fn)", function (t) {
     data.id = "not-bobby";
     callback(null, data);
   });
-  creature.create({ id: 'bobby' }, function(err, result){
+  creature.create({ id: 'bobby' }, function (err, result) {
     t.type(err, "null", 'beforeAll applies - no error');
     t.equal('not-bobby', result.id, 'beforeAll applied - result.id == "not-bobby"');
     t.end();
@@ -43,7 +43,7 @@ test("adding creature.before('create')", function (t) {
     next(null, data);
   });
   t.equal(creature.create.before.length, 1);
-  creature.create({ id: 'bobby' }, function(err, result){
+  creature.create({ id: 'bobby' }, function (err, result) {
     t.type(err, "null", 'creature.before("create") applied - no error');
     t.equal(result.id, 'larry', 'creature.before("create") applied - result.id == "larry"');
     t.end();
@@ -56,7 +56,7 @@ test("adding another creature.before('create')", function (t) {
     next(null, data);
   });
   t.equal(creature.create.before.length, 2);
-  creature.create({ id: 'bobby' }, function(err, result){
+  creature.create({ id: 'bobby' }, function (err, result) {
     t.type(err, "null", 'second creature.before("create") applied - no error');
     t.equal(result.id, 'larry-a', 'second creature.before("create") applied - result.id == "larry-a"');
     t.end();
@@ -71,7 +71,7 @@ test("run it again", function (t) {
   //
   creature.destroy('larry-a', function (err) {
     t.equal(!err, true, 'destroyed instance of larry-a');
-    creature.create({ id: 'bobby' }, function(err, result){
+    creature.create({ id: 'bobby' }, function (err, result) {
       t.type(err, "null", 'second creature.before("create") still applied - no error');
       t.equal(result.id, 'larry-a', 'second creature.before("create") still applied - result.id == "larry-a"');
       t.end();
@@ -85,7 +85,7 @@ test("adding another creature.before('create')", function (t) {
     next(null, data);
   });
   t.equal(creature.create.before.length, 3);
-  creature.create({ id: 'bobby' }, function(err, result){
+  creature.create({ id: 'bobby' }, function (err, result) {
     t.type(err, "null", 'third creature.before("create") applied - no error');
     t.equal(result.id, 'larry-a-b', 'third creature.before("create") applied - result.id == "larry-a-b"');
     t.end();
@@ -96,7 +96,7 @@ test("run it again", function (t) {
   t.plan(3);
   creature.destroy('larry-a-b', function (err) {
     t.equal(!err, true, 'destroyed instance of larry-a-b');
-    creature.create({ id: 'bobby' }, function(err, result){
+    creature.create({ id: 'bobby' }, function (err, result) {
       t.type(err, "null", 'third creature.before("create") still applied - no error');
       t.equal(result.id, 'larry-a-b', 'third creature.before("create") still applied - result.id == "larry-a-b"');
       t.end();
@@ -111,7 +111,7 @@ test("remove before hooks on creature.create - run creature.create", function (t
   t.plan(3);
   creature.destroy('not-bobby', function (err, result){
     t.equal(!err, true, 'destroyed instance of not-bobby');
-    creature.create({ id: 'bobby' }, function(err, result){
+    creature.create({ id: 'bobby' }, function (err, result) {
       t.type(err, "null", 'removed create hooks - no error');
       t.equal(result.id, 'not-bobby', 'removed create hooks - only beforeAll applied');
       t.end();
@@ -124,7 +124,7 @@ test("remove beforeAll hooks on resource - run creature.create", function (t) {
     resource.before.pop();
   }
   t.equal(resource.before.length, 0, 'removed beforeAll hooks - before.length == 0');
-  creature.create({ id: 'bobby' }, function(err, result){
+  creature.create({ id: 'bobby' }, function (err, result) {
     t.type(err, "null", 'removed beforeAll hooks - no error');
     t.equal(result.id, 'bobby', 'removed beforeAll hooks - result.id == "bobby"');
     t.end();
@@ -169,7 +169,7 @@ test("adding creature.after('create')", function (t) {
     next(null, data);
   });
   t.equal(creature.create.after.length, 1, 'added after hook - after.length == 1');
-  creature.create({ id: 'jimmy' }, function(err, result){
+  creature.create({ id: 'jimmy' }, function (err, result) {
     t.type(err, "null", 'callback fired - no error');
     t.end();
   });
@@ -185,7 +185,7 @@ test("adding another creature.after('create')", function (t) {
   t.equal(creature.create.after.length, 2, 'added second after hook - after.length == 2');
   creature.destroy('jimmy', function(err) {
     t.type(err, "null", 'destroyed instance of jimmy');
-    creature.create({ id: 'jimmy' }, function(err, result){
+    creature.create({ id: 'jimmy' }, function (err, result) {
       t.type(err, "null", 'callback fired - no error');
       t.end();
     });
@@ -207,7 +207,7 @@ test("define vehicle resource - with datasource config - and before and after ho
     next(null, data);
   });
   t.equal(vehicle.create.before.length, 1);
-  vehicle.create({ id: '#88' }, function(err, result){
+  vehicle.create({ id: '#88' }, function (err, result) {
     t.type(err, "null", 'vehicle create hooks applied - no error');
     t.equal(result.id, '#99', 'vehicle.before("create") applied - result.id == "#99"');
     t.equal(result.fuel, 100, 'vehicle.after("create") applied - result.fuel == 100');
@@ -239,13 +239,13 @@ test("define clock resource - with datasource config - and asynchronous before h
   });
 
   t.equal(clock.create.before.length, 2);
-  clock.create({ id: 'foo' }, function(err, result){
+  clock.create({ id: 'foo' }, function (err, result) {
     t.type(err, "null", 'clock create hooks applied - no error');
     t.similar(clicks.foo, ['tick', 'tock' ], 'clock.before("create") hooks applied - clicks.foo is ["tick", "tock"]');
   });
 
   setTimeout(function () {
-    clock.create({ id: 'bar' }, function(err, result){
+    clock.create({ id: 'bar' }, function (err, result) {
       t.type(err, "null", 'clock create hooks applied - no error');
       t.similar(clicks.bar, ['tick', 'tock' ], 'clock.before("create") hooks applied - clicks.bar is ["tick", "tock"]');
     });

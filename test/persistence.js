@@ -132,7 +132,7 @@ test("define space resource - with datasource config", function(t) {
 });
 
 test("executing creature.all", function (t) {
-  creature.all(function(err, result){
+  creature.all(function (err, result) {
     t.equal(result.length, 0, 'no creatures');
     t.end();
   });
@@ -143,7 +143,7 @@ test("executing creature.create", function (t) {
     id: 'bobby',
     metadata: data,
     items: items // array property currently has serialization issue
-  }, function(err, result){
+  }, function (err, result) {
     t.type(err, 'null', 'no error');
     t.type(result, 'object', 'result is object');
     t.equal(result.id, 'bobby', 'id is correct');
@@ -162,7 +162,7 @@ test("executing creature.create - when already created", function (t) {
     id: 'bobby',
     metadata: data,
     items: items // array property current has serialization issue
-  }, function(err, result){
+  }, function (err, result) {
     t.type(err, 'object', 'an error');
     t.equal(!result, true, 'no result');
     t.equal(err.message, 'bobby already exists', 'bobby already exists');
@@ -171,7 +171,7 @@ test("executing creature.create - when already created", function (t) {
 });
 
 test("executing creature.get", function (t) {
-  creature.get('bobby', function(err, result){
+  creature.get('bobby', function (err, result) {
     t.type(err, 'null', 'no error');
     t.type(result, 'object', 'result is object');
     t.type(result.metadata, 'object', 'metadata is object');
@@ -185,14 +185,14 @@ test("executing creature.get", function (t) {
 });
 
 test("executing creature.all", function (t) {
-  creature.all(function(err, result) {
+  creature.all(function (err, result) {
     t.equal(result.length, 1, 'one creature');
     t.end();
   });
 });
 
 test("executing creature.create - with bad input", function (t) {
-  creature.create({ id: 'larry', life: "abc" }, function(err, result){
+  creature.create({ id: 'larry', life: "abc" }, function (err, result) {
     t.type(err, 'object', 'continues correct validation error - err is object');
     t.type(err.errors, 'object', 'continues correct validation error - err.errors is object');
     t.equal(err.errors.length, 1, 'continues correct validation error - one validation error');
@@ -205,14 +205,14 @@ test("executing creature.create - with bad input", function (t) {
 });
 
 test("executing creature.get", function (t) {
-  creature.get('larry', function(err, result){
+  creature.get('larry', function (err, result) {
     t.type(err, 'object', 'could not find larry');
     t.end();
   });
 });
 
 test("executing creature.all", function (t) {
-  creature.all(function(err, result){
+  creature.all(function (err, result) {
     t.equal(result.length, 1);
     t.end();
   });
@@ -220,7 +220,7 @@ test("executing creature.all", function (t) {
 
 
 test("executing creature.update", function (t) {
-  creature.update({ id: 'bobby', life: 9999 , items: items }, function(err, result){
+  creature.update({ id: 'bobby', life: 9999 , items: items }, function (err, result) {
     t.type(err, 'null', 'updated bobby - no error');
     t.type(result, 'object', 'updated bobby - result is object');
     t.equal(result.life, 9999, 'updated bobby - result.life == 9999');
@@ -260,7 +260,7 @@ test("executing create.updateOrCreate = with existing id", function (t) {
 test("executing account.create with same id as a creature", function (t) {
   account.create({
     id: 'bobby'
-  }, function(err, result){
+  }, function (err, result) {
     t.type(err, 'null', 'no error');
     t.type(result, 'object', 'result is object');
     t.equal(result.id, 'bobby', 'id is correct');
@@ -269,7 +269,7 @@ test("executing account.create with same id as a creature", function (t) {
 });
 
 test("creating a space", function(t) {
-  space.create({id: "big"}, function(err, result) {
+  space.create({id: "big"}, function (err, result) {
     t.type(err, 'null', 'no error');
     t.type(result, 'object', 'space instance is object');
     t.type(result.id, 'string', 'space instance id is string');
@@ -285,7 +285,7 @@ test("add creature to space", function(t) {
     t.type(err, 'null', 'no error');
     _space.resources['creature'] = ['bobby'];
     _space.metadata.foo = "tar";
-    _space.save(function(err, result) {
+    _space.save(function (err, result) {
       t.type(err, 'null', 'no error');
       t.type(result, 'object', 'space instance is object');
       t.type(result.id, 'string', 'space instance id is string');
@@ -300,7 +300,7 @@ test("add creature to space", function(t) {
 });
 
 test("create another new space", function(t) {
-  space.create({id: "big2"}, function(err, result) {
+  space.create({id: "big2"}, function (err, result) {
     t.type(err, 'null', 'no error');
     t.type(result, 'object', 'space instance is object');
     t.type(result.id, 'string', 'space instance id is string');
@@ -314,16 +314,16 @@ test("create another new space", function(t) {
 
 test("executing space.destroy", function (t) {
   t.plan(2);
-  space.destroy('big', function(err, result){
+  space.destroy('big', function (err, result) {
     t.type(result, 'null', 'destroyed space big');
   });
-  space.destroy('big2', function(err, result){
+  space.destroy('big2', function (err, result) {
     t.type(result, 'null', 'destroyed space big2');
   });
 });
 
 test("executing space.all", function (t) {
-  space.all(function(err, result){
+  space.all(function (err, result) {
     t.equal(result.length, 0, 'no spaces');
     t.end();
   });
@@ -331,30 +331,30 @@ test("executing space.all", function (t) {
 
 test("executing creature.destroy", function (t) {
   t.plan(2);
-  creature.destroy('bobby', function(err, result){
+  creature.destroy('bobby', function (err, result) {
     t.type(result, 'null', 'destroyed bobby');
   });
-  creature.destroy('larry', function(err, result){
+  creature.destroy('larry', function (err, result) {
     t.type(result, 'null', 'destroyed larry');
   });
 });
 
 test("executing account.destroy", function (t) {
   t.plan(1);
-  account.destroy('bobby', function(err, result){
+  account.destroy('bobby', function (err, result) {
     t.type(result, 'null', 'destroyed bobby');
   });
 });
 
 test("executing creature.get", function (t) {
-  creature.get('bobby', function(err, result){
+  creature.get('bobby', function (err, result) {
     t.type(err, 'object', 'could not find bobby');
     t.end();
   });
 });
 
 test("executing creature.all", function (t) {
-  creature.all(function(err, result){
+  creature.all(function (err, result) {
     t.equal(result.length, 0, 'no creatures');
     t.end();
   });

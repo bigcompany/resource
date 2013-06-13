@@ -56,7 +56,7 @@ test("define method on creature - with schema - single text argument", function 
 });
 
 test("define method on creature - with no schema - invoke with string argument and callback", function (t) {
-  creature.method('talk', function(text, callback){
+  creature.method('talk', function (text, callback) {
     callback(null, text);
   });
 
@@ -68,7 +68,7 @@ test("define method on creature - with no schema - invoke with string argument a
   creature.once('talk', function (data) {
     t.equal('hi', data, 'talk fired - data == "hi"');
   });
-  creature.talk('hi', function(err, result){
+  creature.talk('hi', function (err, result) {
     t.type(err, "null", 'callback fired - no error');
     t.equal(result, 'hi', 'callback fired - result == "hi"');
   });
