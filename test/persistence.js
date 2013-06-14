@@ -56,8 +56,15 @@ test("define creature resource - with datasource config", function (t) {
   });
 
   creature.property('items', {
-    "type": "array"
+    "type": "array",
+    "default": []
   });
+
+  creature.property('moreItems', {
+    "type": "array",
+    "default": ['a', 'b', 'c']
+  });
+
 
   t.type(creature.config, 'object', 'configuration defined - creature.config is object');
   t.equal(testDatasource, creature.config.datasource, ('configuration defined - creature.config.datasource == "' + testDatasource + '"'));
@@ -148,6 +155,7 @@ test("executing creature.create", function (t) {
     t.type(result, 'object', 'result is object');
     t.equal(result.id, 'bobby', 'id is correct');
     t.type(result.metadata, 'object', 'metadata is object');
+    t.equal(result.moreItems[0], 'a', 'default array item set');
     t.equal(result.metadata.foo, 'bar');
     t.equal(result.metadata.abc, 123);
     t.equal(result.metadata.data.prop1, 'foo');
