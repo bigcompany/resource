@@ -60,6 +60,11 @@ test("define creature resource - with datasource config", function (t) {
     "default": []
   });
 
+  creature.property('itemsNoDefault', {
+    "type": "array"
+  });
+
+
   creature.property('moreItems', {
     "type": "array",
     "default": ['a', 'b', 'c']
@@ -161,6 +166,7 @@ test("executing creature.create", function (t) {
     t.equal(result.metadata.data.prop1, 'foo');
     t.equal(result.metadata.data.prop2, 'bar');
     t.type(result.items, Array, 'items is array');
+    t.type(result.itemsNoDefault, Array, 'items is array');
     t.end();
   });
 });
