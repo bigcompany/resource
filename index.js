@@ -364,15 +364,22 @@ var instantiate = resource.instantiate = function (schema, levelData) {
 
   Object.keys(schema.properties).forEach(function (prop, i) {
 
-    if (typeof schema.properties[prop].default !== 'undefined') {
-      if (typeof schema.properties[prop].default === 'object') {
-        obj[prop] = {};
+    if (schema.properties[prop].type === 'object') {
+      obj[prop] = {};
+      if (typeof schema.properties[prop].default !== 'undefined') {
         for (var p in schema.properties[prop].default) {
           obj[prop][p] = schema.properties[prop].default[p];
         }
-      } else {
-        obj[prop] = schema.properties[prop].default;
       }
+    } else if (schema.properties[prop].type === 'array') {
+      obj[prop] = [];
+      if (typeof schema.properties[prop].default !== 'undefined') {
+        schema.properties[prop].default.forEach(function(item){
+          obj[prop].push(item);
+        });
+      }
+    } else {
+      obj[prop] = schema.properties[prop].default || '';
     }
 
     if (typeof levelData[prop] !== 'undefined') {
