@@ -124,7 +124,8 @@ test("define method on creature - with schema - and single boolean argument", fu
   t.end();
 });
 
-test("define method on creature - with schema - and single boolean argument - with bad input", function (t) {
+// TODO: move to arguments coercion tests
+test("define method on creature - with schema - and single boolean argument - with any string input", function (t) {
   creature.method('talk', function (mute) {
     return mute ? '' : 'hi';
   }, {
@@ -135,17 +136,51 @@ test("define method on creature - with schema - and single boolean argument - wi
     }
   });
   var result;
+  result = creature.talk('hello');
+  t.equal(result, '');
+  t.end();
+});
+
+test("define method on creature - with schema - and single number argument - with number string input", function (t) {
+  creature.method('count', function (count) {
+    return count;
+  }, {
+    "properties": {
+      "a" : {
+        "type": "number"
+      }
+    }
+  });
+  var result;
+  result = creature.count('123');
+  t.equal(result, 123);
+  t.end();
+});
+
+test("define method on creature - with schema - and single number argument - with non-number string input", function (t) {
+  creature.method('count', function (count) {
+    return count;
+  }, {
+    "properties": {
+      "a" : {
+        "type": "number"
+      }
+    }
+  });
+
+  var result;
   try {
-    result = creature.talk('hello');
+    result = creature.count('abc'); console.log(result)
   }
   catch (err) {
     t.doesNotThrow(function () {
-      t.equal(err.errors[0].attribute, 'type', 'did not talk - result[0].attribute == "type"');
-      t.equal(err.errors[0].property, 'mute', 'did not talk - result[0].attribute == "mute"');
-      t.equal(err.errors[0].actual, 'string', 'did not talk - result[0].actual == "string"');
-    }, 'thrown error has validation errors array');
+      t.equal(err.errors[0].attribute, 'type', 'did not count - result[0].attribute == "type"');
+      t.equal(err.errors[0].property, 'a', 'did not count - result[0].attribute == "a"');
+      t.equal(err.errors[0].actual, 'string', 'did not count - result[0].actual == "string"');
+    }, 'thrown error has array of validation errors');
     t.end();
   }
+
 });
 
 test("define method on creature - with schema - and one callback argument", function (t) {
