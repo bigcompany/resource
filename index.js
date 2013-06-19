@@ -363,10 +363,9 @@ var instantiate = resource.instantiate = function (schema, levelData) {
   }
 
   Object.keys(schema.properties).forEach(function (prop, i) {
-
     if (schema.properties[prop].type === 'object') {
-      obj[prop] = {};
-      if (typeof schema.properties[prop].default !== 'undefined') {
+      if (typeof schema.properties[prop].default === 'object') {
+        obj[prop] = {};
         for (var p in schema.properties[prop].default) {
           obj[prop][p] = schema.properties[prop].default[p];
         }
