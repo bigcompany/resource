@@ -170,7 +170,7 @@ test("define method on creature - with schema - and single number argument - wit
 
   var result;
   try {
-    result = creature.count('abc'); console.log(result)
+    result = creature.count('abc');
   }
   catch (err) {
     t.doesNotThrow(function () {
@@ -181,6 +181,23 @@ test("define method on creature - with schema - and single number argument - wit
     t.end();
   }
 
+});
+
+test("define method on creature - with schema - and single number argument with default value - and value provided", function (t) {
+  creature.method('count', function (count) {
+    return count;
+  }, {
+    "properties": {
+      "a" : {
+        "type": "number",
+        "default": 123
+      }
+    }
+  });
+  var result;
+  result = creature.count();
+  t.equal(result, 123);
+  t.end();
 });
 
 test("define method on creature - with schema - and one callback argument", function (t) {
