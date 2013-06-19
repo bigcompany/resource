@@ -1,20 +1,32 @@
-# JavaScript Resource engine
+# resource
 
-## Purpose
+## what is a resource?
 
-A library to create resources. A resource can be consider a combination of a Model and Controller. Through creating resources the developer is freed from having to write the same validation and interface boiler-plate code over and over again. If persistence is enabled resources can be instantiable and stored to a datasource. The structure of a resource is highly introspect-able allowing for easy reflection across a variety of [robust interfaces](http://github.com/bigcompany/resources).
+ - a resource is part of the Resource-View-Presenter development pattern
+ - a resource is just a Plain Ole JavaScript object
+ - a resource may have methods
+ - a resource may have properties
+ - a resource may have npm dependencies
+ - due to their simple structure, a resource is highly [introspectable](http://en.wikipedia.org/wiki/Reflection_(computer_programming). 
 
-## Features
+## why are resources useful?
+  - Can easily extends functionality through intelligent dual-sided  dependency injection system
+  - Standardizes validation and invokation code across all business-logic
+  - Pre-defined resources will solve almost all your problems
+  - 
+## resource library features
 
- - Easy to use API
- - Provides validation and schema for JavaScript Objects and Functions
- - Resources are highly introspect-able
- - Resources can persist to multiple datasource types ( Memory / Couch / FS / Mongo / etc..)
- - Built-in hooking system for resource methods
- - JSON-Schema compatible
- - Resources can be CommonJS Modules
- - Resources support NPM dependencies with lazy installs and resource method deferment
- - Large library of [pre-built resources](http://github.com/bigcompany/resources) available
+  - a very friendly API !
+  - dependency injection 
+  - intelligent resource method defferment until each resource's `npm` dependencies are satisified
+  - fully-featured EventEmitter API
+  - fully-featured hooking API
+  -  Large well-developed library of robust [pre-defined resources](http://github.com/bigcompany/resources)
+    - `persistence` for resource database persistence
+    - `config` for resource configuration 
+    - `admin` web admin for managing resources
+    - [many many more !](http://github.com/bigcompany/resources)
+  - Since a resource is just a JavaScript Object it can always just used exported or required as a `npm` module
 
 ## Installation
 
