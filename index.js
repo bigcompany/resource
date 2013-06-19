@@ -388,6 +388,9 @@ var instantiate = resource.instantiate = function (schema, levelData) {
        }
      }
     } else if (schema.properties[prop].type === 'number') {
+      if(typeof levelData[prop] === 'undefined') {
+        levelData[prop] = schema.properties[prop].default;
+      }
       var numbery = parseFloat(levelData[prop], 10);
       if (numbery.toString() !== 'NaN') {
        levelData[prop] = numbery;
