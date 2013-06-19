@@ -10,10 +10,11 @@
  - due to their simple structure, a resource is highly [introspectable](http://en.wikipedia.org/wiki/Reflection_(computer_programming). 
 
 ## why are resources useful?
-  - Can easily extends functionality through intelligent dual-sided  dependency injection system
-  - Standardizes validation and invokation code across all business-logic
-  - Pre-defined resources will solve almost all your problems
-  - 
+
+ - Can easily extends functionality through intelligent dual-sided  dependency injection system
+ - Standardizes validation and invokation code across all business-logic
+ - Pre-defined resources will solve almost all your problems
+
 ## resource library features
 
   - a very friendly API !
