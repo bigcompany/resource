@@ -7,13 +7,13 @@
  - a resource may have methods
  - a resource may have properties
  - a resource may have npm dependencies
- - due to their simple structure, resources are highly [introspectable](http://en.wikipedia.org/wiki/Reflection_(computer_programming)). 
+ - due to their simple structure, resources are highly <a href="http://en.wikipedia.org/wiki/Reflection_(computer_programming)">introspectable</a>. 
 
 ## why are resources useful?
 
  - Can easily extends functionality through intelligent dual-sided  dependency injection system
- - Standardizes validation and invokation code across all business-logic
- - Pre-defined resources will solve almost all your problems
+ - Standardizes validation and invocation code across all business-logic
+ - Optional pre-defined [resources](http://github.com/bigcompany/resources) will solve almost all your problems
 
 ## resource library features
 
@@ -23,6 +23,7 @@
   - fully-featured EventEmitter API
   - fully-featured hooking API
   -  Large well-developed library of robust [pre-defined resources](http://github.com/bigcompany/resources)
+    - `schema` for resource database persistence
     - `persistence` for resource database persistence
     - `config` for resource configuration 
     - `admin` web admin for managing resources
@@ -41,52 +42,6 @@ var resource = require('resource'),
     creature = resource.define('creature');
 ```
 
-## Add resource properties
-
-```js
-creature.property('title');
-```
-
-## Add resource properties with JSON-Schema
-
-```js
-creature.property('type', { type: "string", enum: ['dragon', 'unicorn', 'pony'], default: "dragon"});
-creature.property('life', { type: "number", default: 10 });
-```
-
-## Persisting resources to a datasource
-
-```js
-//
-// Can also persist to 'fs', 'mongo', 'couch', etc...
-//
-creature.persist('memory');
-
-creature.property('type');
-
-creature.create({ id: 'bobby', type: 'dragon' }, function (err, result) {
-  console.log(err);
-  console.log(result.id);
-  console.log(result.type);
-});
-```
-Enabling persistence will also add: `creature.get`, `creature.destroy`, `creature.update`, `creature.find`, `creature.all`.
-
-## Persisting resources with options
-
-```js
-//
-// The fs datasource uses the "path" property instead of
-// "host" and "port"
-//
-creature.persist({
-  type: 'couch',
-  host: 'this-is-a-sandbox.iriscouch.com',
-  port: 5984,
-  username: 'guest',
-  password: 'parakeet'
-});
-```
 
 ## Adding resource methods
 
@@ -152,6 +107,53 @@ creature.method('fire', fire, {
       }
     }
 }});
+```
+
+## Add resource properties
+
+```js
+creature.property('title');
+```
+
+## Add resource properties with JSON-Schema
+
+```js
+creature.property('type', { type: "string", enum: ['dragon', 'unicorn', 'pony'], default: "dragon"});
+creature.property('life', { type: "number", default: 10 });
+```
+
+## Persisting resources to a datasource
+
+```js
+//
+// Can also persist to 'fs', 'mongo', 'couch', etc...
+//
+creature.persist('memory');
+
+creature.property('type');
+
+creature.create({ id: 'bobby', type: 'dragon' }, function (err, result) {
+  console.log(err);
+  console.log(result.id);
+  console.log(result.type);
+});
+```
+Enabling persistence will also add: `creature.get`, `creature.destroy`, `creature.update`, `creature.find`, `creature.all`.
+
+## Persisting resources with options
+
+```js
+//
+// The fs datasource uses the "path" property instead of
+// "host" and "port"
+//
+creature.persist({
+  type: 'couch',
+  host: 'this-is-a-sandbox.iriscouch.com',
+  port: 5984,
+  username: 'guest',
+  password: 'parakeet'
+});
 ```
 
 ## Using resource.before() and resource.after() hooks
