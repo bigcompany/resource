@@ -357,7 +357,6 @@ var instantiate = resource.instantiate = function (schema, levelData) {
   var obj = {};
 
   levelData = levelData || {};
-
   if (typeof schema.properties === 'undefined') {
     return obj;
   }
@@ -378,12 +377,22 @@ var instantiate = resource.instantiate = function (schema, levelData) {
         });
       }
     } else if (schema.properties[prop].type === 'boolean') {
-	  if (schema.properties[prop].default === true) {
+      if (schema.properties[prop].default === true) {
         obj[prop] = true;
-  	  } else {
-	    obj[prop] = false;
-	  }
-	}
+      } else {
+        obj[prop] = false;
+      }
+     if (typeof levelData[prop] !== 'undefined') {
+       if (levelData[prop] !== 'false' && levelData[prop] !== false ) {
+         levelData[prop] = true;
+       }
+     }
+    } else if (schema.properties[prop].type === 'number') {
+      var numbery = parseFloat(levelData[prop], 10);
+      if (numbery.toString() !== 'NaN') {
+       levelData[prop] = numbery;
+      }
+    }
     else {
       obj[prop] = schema.properties[prop].default || '';
     }
