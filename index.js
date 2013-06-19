@@ -378,7 +378,14 @@ var instantiate = resource.instantiate = function (schema, levelData) {
           obj[prop].push(item);
         });
       }
-    } else {
+    } else if (schema.properties[prop].type === 'boolean') {
+	  if (schema.properties[prop].default === true) {
+        obj[prop] = true;
+  	  } else {
+	    obj[prop] = false;
+	  }
+	}
+    else {
       obj[prop] = schema.properties[prop].default || '';
     }
 
