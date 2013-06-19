@@ -7,7 +7,7 @@
  - a resource may have methods
  - a resource may have properties
  - a resource may have npm dependencies
- - due to their simple structure, a resource is highly [introspectable](http://en.wikipedia.org/wiki/Reflection_(computer_programming). 
+ - due to their simple structure, resources are highly [introspectable](http://en.wikipedia.org/wiki/Reflection_(computer_programming)). 
 
 ## why are resources useful?
 
