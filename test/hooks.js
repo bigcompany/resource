@@ -24,18 +24,6 @@ test("define creature resource - with datasource config", function (t) {
   t.end()
 });
 
-test("adding a module-scoped Resource.beforeAll(fn)", function (t) {
-  resource.beforeAll(function (data, callback) {
-    data.id = "not-bobby";
-    callback(null, data);
-  });
-  creature.create({ id: 'bobby' }, function (err, result) {
-    t.type(err, "null", 'beforeAll applies - no error');
-    t.equal('not-bobby', result.id, 'beforeAll applied - result.id == "not-bobby"');
-    t.end();
-  });
-});
-
 test("adding creature.before('create')", function (t) {
   t.equal(creature.create.before.length, 0, 'no before hooks yet on creature');
   creature.before('create', function (data, next) {
@@ -108,25 +96,10 @@ test("remove before hooks on creature.create - run creature.create", function (t
   for(var i=0; i <= creature.methods.create.before.length + 1; i++) {
     creature.methods.create.before.pop();
   }
-  t.plan(3);
-  creature.destroy('not-bobby', function (err, result){
-    t.equal(!err, true, 'destroyed instance of not-bobby');
-    creature.create({ id: 'bobby' }, function (err, result) {
-      t.type(err, "null", 'removed create hooks - no error');
-      t.equal(result.id, 'not-bobby', 'removed create hooks - only beforeAll applied');
-      t.end();
-    });
-  });
-});
-
-test("remove beforeAll hooks on resource - run creature.create", function (t) {
-  for(var i=0; i <= resource.before.length + 1; i++) {
-    resource.before.pop();
-  }
-  t.equal(resource.before.length, 0, 'removed beforeAll hooks - before.length == 0');
+  t.plan(2);
   creature.create({ id: 'bobby' }, function (err, result) {
-    t.type(err, "null", 'removed beforeAll hooks - no error');
-    t.equal(result.id, 'bobby', 'removed beforeAll hooks - result.id == "bobby"');
+    t.type(err, "null", 'removed create hooks - no error');
+    t.equal(result.id, 'bobby', 'removed create hooks - only beforeAll applied');
     t.end();
   });
 });
