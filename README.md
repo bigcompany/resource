@@ -2,16 +2,16 @@
 
 ## what is a resource?
 
- - a resource is part of the Resource-View-Presenter development pattern
  - a resource is just a Plain Ole JavaScript object
  - a resource may have methods
  - a resource may have properties
- - a resource may have npm dependencies
+ - a resource may have [npm](http://npmjs.org) dependencies
+ - a resource is part of the Resource-View-Presenter development pattern
  - due to their simple structure, resources are highly <a href="http://en.wikipedia.org/wiki/Reflection_(computer_programming)">introspectable</a>. 
 
 ## why are resources useful?
 
- - Can easily extends functionality through intelligent dual-sided  dependency injection system
+ - Can easily extend functionality through intelligent dependency injection
  - Standardizes validation and invocation code across all business-logic
  - Optional pre-defined [resources](http://github.com/bigcompany/resources) will solve almost all your problems
 
@@ -23,7 +23,6 @@
   - fully-featured EventEmitter API
   - fully-featured hooking API
   -  Large well-developed library of robust [pre-defined resources](http://github.com/bigcompany/resources)
-    - `schema` for resource database persistence
     - `persistence` for resource database persistence
     - `config` for resource configuration 
     - `admin` web admin for managing resources
