@@ -18,13 +18,17 @@ resource = new EventEmitter({
 var colors = require('colors');
 
 //
-// Require a simple JSON-Schema validator
+// Resource.use is the most the basic bootstraping / dependency injection method,
+// `resource.use` can now used to compose additional functionality with new sources
 //
-var validator = resource.validator = require('./vendor/validator');
-var helper = resource.helper = require('./lib/helper');
-var logger = resource.logger = require('./lib/logger');
 resource.load = require('./lib/load');
 resource.use = require('./lib/use');
+
+//
+// Require a simple JSON-Schema validator
+//
+var helper = resource.helper = require('./lib/helper');
+var logger = resource.logger = require('./lib/logger');
 
 //
 // Resource environment, either set to NODE_ENV or "development"
@@ -40,7 +44,6 @@ resource._queue = [];
 // On the resource, create a "resources" object that will store a reference to every defined resource
 //
 resource.resources = {};
-
 
 /*
 
@@ -372,7 +375,7 @@ var instantiate = resource.instantiate = function (schema, levelData) {
     } else if (schema.properties[prop].type === 'array') {
       obj[prop] = [];
       if (typeof schema.properties[prop].default !== 'undefined') {
-        schema.properties[prop].default.forEach(function(item){
+        schema.properties[prop].default.forEach(function (item) {
           obj[prop].push(item);
         });
       }
@@ -382,18 +385,18 @@ var instantiate = resource.instantiate = function (schema, levelData) {
       } else {
         obj[prop] = false;
       }
-     if (typeof levelData[prop] !== 'undefined') {
-       if (levelData[prop] !== 'false' && levelData[prop] !== false ) {
-         levelData[prop] = true;
-       }
-     }
+      if (typeof levelData[prop] !== 'undefined') {
+        if (levelData[prop] !== 'false' && levelData[prop] !== false) {
+          levelData[prop] = true;
+        }
+      }
     } else if (schema.properties[prop].type === 'number') {
-      if(typeof levelData[prop] === 'undefined') {
+      if (typeof levelData[prop] === 'undefined') {
         levelData[prop] = schema.properties[prop].default;
       }
       var numbery = parseFloat(levelData[prop], 10);
       if (numbery.toString() !== 'NaN') {
-       levelData[prop] = numbery;
+        levelData[prop] = numbery;
       }
     }
     else {
@@ -480,9 +483,9 @@ function addMethod(r, name, method, schema, tap) {
       var hooks;
       if (Array.isArray(resource.before) && resource.before.length > 0) {
         hooks = resource.before.slice();
-
         function iter() {
           var hook = hooks.pop();
+          hook = hook.bind({ resource: r.name, method: name });
           hook(args[0], function (err, data) {
             if (err) {
               return cb(err);
@@ -514,6 +517,7 @@ function addMethod(r, name, method, schema, tap) {
         hooks = fn.before.slice();
         function iter() {
           var hook = hooks.pop();
+          hook = hook.bind({ resource: r.name, method: name });
           hook(args[0], function (err, data) {
             if (err) {
               return cb(err);
@@ -540,6 +544,11 @@ function addMethod(r, name, method, schema, tap) {
       // which has been defined with the method signature and validate against it
       //
       if (typeof schema === 'object') {
+
+        //
+        // A schema is present, so use the validator resource
+        //
+        var validator = resource.use('validator');
 
         var _instance = {},
             _data = {};
