@@ -7,7 +7,8 @@
 //
 var resource = {};
 
-var EventEmitter = require('eventemitter2').EventEmitter2;
+var colors = require('colors'),
+    EventEmitter = require('eventemitter2').EventEmitter2;
 
 resource = new EventEmitter({
   wildcard: true, // event emitter should use wildcards ( * )
@@ -15,20 +16,19 @@ resource = new EventEmitter({
   maxListeners: 20, // the max number of listeners that can be assigned to an event
 });
 
-var colors = require('colors');
+resource.load = require('./lib/load');
 
 //
 // Resource.use is the most the basic bootstraping / dependency injection method,
 // `resource.use` can now used to compose additional functionality with new sources
 //
-resource.load = require('./lib/load');
 resource.use = require('./lib/use');
+
 
 //
 // Require a simple JSON-Schema validator
 //
 var helper = resource.helper = require('./lib/helper');
-var logger = resource.logger = require('./lib/logger');
 
 //
 // Resource environment, either set to NODE_ENV or "development"
@@ -251,7 +251,7 @@ resource.beforeAll = function (callback) {
 // After all npm deps are installed, any queued up resource methods that were defferred due to
 // missing deps, will now drain and execute
 //
-resource.installDeps = function (r) {
+resource.install = function (r) {
 
   //
   // TODO: make this work with remote files as well as local
@@ -270,7 +270,7 @@ resource.installDeps = function (r) {
     try {
       require.resolve(resourcePath);
     } catch (err) {
-      logger.warn(r.name.magenta + ' resource is missing a required dependency: ' + dep.yellow);
+      console.log(r.name.magenta + ' resource is missing a required dependency: ' + dep.yellow);
       // TODO: check to see if dep is already in the process of being installed,
       // if so, don't attempt to install it twice
       if (typeof resource.installing[dep] === 'undefined') {
@@ -293,8 +293,8 @@ resource.installDeps = function (r) {
   //
   // Spawn npm as child process to perform installation
   //
-  logger.warn('spawning ' + 'npm'.grey + ' to install missing dependencies');
-  logger.exec('npm ' + _command.join(' '));
+  console.log('spawning ' + 'npm'.grey + ' to install missing dependencies');
+  console.log('npm ' + _command.join(' '));
 
   //
   // Cross-platform npm binary detection using `which` module
@@ -315,15 +315,15 @@ resource.installDeps = function (r) {
   });
 
   npm.on('error', function () {
-    logger.error('npm installation error!');
+    console.log('npm installation error!');
     process.exit();
   });
 
   npm.on('exit', function (code) {
-    logger.info('npm just exited with code ' + code.toString().red);
+    console.log('npm just exited with code ' + code.toString().red);
     if (code === 3) {
-      logger.error('cannot install as current user');
-      logger.help('try running this command again with sudo');
+      console.log('cannot install as current user');
+      console.log('try running this command again with sudo');
       process.exit(3);
     }
     _command.forEach(function (c, i) {
@@ -334,8 +334,8 @@ resource.installDeps = function (r) {
       }
     });
     if (Object.keys(resource.installing).length === 0) {
-      logger.info('npm installation complete');
-      logger.warn('now executing ' + resource._queue.length + ' defferred call(s)');
+      console.log('npm installation complete');
+      console.log('now executing ' + resource._queue.length + ' defferred call(s)');
 
       //
       // Calling an element in the queue can add new elements to the queue on
@@ -438,7 +438,7 @@ function addMethod(r, name, method, schema, tap) {
     // if so, determine if there are any missing deps that will need to be installed
     //
     if (typeof r.dependencies === 'object') {
-      resource.installDeps(r);
+      resource.install(r);
     }
 
 
@@ -446,7 +446,7 @@ function addMethod(r, name, method, schema, tap) {
       resource._queue.unshift(function () {
         fn.apply(this, args);
       });
-      logger.warn('deffering execution of `' + (r.name + '.' + name).yellow + '` since dependencies are missing');
+      console.log('deffering execution of `' + (r.name + '.' + name).yellow + '` since dependencies are missing');
       return;
     }
 
@@ -689,7 +689,7 @@ function addMethod(r, name, method, schema, tap) {
             // so that any possible async error won't die silently
             //
             if (err) {
-              logger.warn('about to throw an error from ' + r.name + '.' + name + ' since no callback was provided and an async error occurred!');
+              console.log('about to throw an error from ' + r.name + '.' + name + ' since no callback was provided and an async error occurred!');
               logger.help('adding a callback argument to ' + r.name + '.' + name + ' will prevent this throw from happening');
               throw err;
             }
@@ -957,37 +957,18 @@ resource.schema = {
 };
 
 //
-// Create logger resource
-//
-
-var _logger = resource.define('logger');
-_logger.schema.description = "a simple STDOUT based logger";
-_logger.method("log", logger.log, {
-  "description": "logs data to STDOUT",
-  "properties": {
-    "level": {
-      "type": "string",
-      "default": "info"
-    },
-    "message": {
-      "type": "any"
-    }
-  }
-});
-
-//
 // Override original logger with new logger resource
 // TODO: cleanup override logic
-resource.logger = _logger;
+// resource.logger = _logger;
 
 //
 // Preserve old logging levels
 //
-for (var level in logger.levels) {
-  resource.logger[level] = logger[level];
-}
+//for (var level in logger.levels) {
+//  resource.logger[level] = logger[level];
+//}
 
-resource.logger.put = logger.put;
+//resource.logger.put = logger.put;
 
 //
 // end logger resource
@@ -997,3 +978,7 @@ resource.methods = [];
 resource.name = "resource";
 
 module['exports'] = resource;
+
+// hard-code the use of logger into resource core ( fow now )
+// TODO: remove all need for console.logging in core
+var logger = resource.use('logger');
