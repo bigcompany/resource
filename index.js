@@ -25,9 +25,6 @@ resource.load = require('./lib/load');
 resource.use = require('./lib/use');
 
 
-//
-// Require a simple JSON-Schema validator
-//
 var helper = resource.helper = require('./lib/helper');
 
 //
@@ -593,7 +590,7 @@ function addMethod(r, name, method, schema, tap) {
         //
         // Perform a schema validation on the new instance to ensure validity
         //
-        var validate = validator.validate(_instance, schema);
+        var validate = validator.validate.unwrapped(_instance, schema);
 
         //
         // If the schema validation fails, do not fire the wrapped method
