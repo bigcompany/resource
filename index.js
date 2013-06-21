@@ -270,7 +270,7 @@ resource.install = function (r) {
     try {
       require.resolve(resourcePath);
     } catch (err) {
-      console.log(r.name.magenta + ' resource is missing a required dependency: ' + dep.yellow);
+      // console.log(r.name.magenta + ' resource is missing a required dependency: ' + dep.yellow);
       // TODO: check to see if dep is already in the process of being installed,
       // if so, don't attempt to install it twice
       if (typeof resource.installing[dep] === 'undefined') {
@@ -293,8 +293,7 @@ resource.install = function (r) {
   //
   // Spawn npm as child process to perform installation
   //
-  console.log('spawning ' + 'npm'.grey + ' to install missing dependencies');
-  console.log('npm ' + _command.join(' '));
+  // console.log('npm ' + _command.join(' '));
 
   //
   // Cross-platform npm binary detection using `which` module
@@ -320,7 +319,7 @@ resource.install = function (r) {
   });
 
   npm.on('exit', function (code) {
-    console.log('npm just exited with code ' + code.toString().red);
+    // console.log('npm just exited with code ' + code.toString().red);
     if (code === 3) {
       console.log('cannot install as current user');
       console.log('try running this command again with sudo');
@@ -334,8 +333,8 @@ resource.install = function (r) {
       }
     });
     if (Object.keys(resource.installing).length === 0) {
-      console.log('npm installation complete');
-      console.log('now executing ' + resource._queue.length + ' defferred call(s)');
+      // console.log('npm installation complete');
+      // console.log('now executing ' + resource._queue.length + ' defferred call(s)');
 
       //
       // Calling an element in the queue can add new elements to the queue on
@@ -446,7 +445,7 @@ function addMethod(r, name, method, schema, tap) {
       resource._queue.unshift(function () {
         fn.apply(this, args);
       });
-      console.log('deffering execution of `' + (r.name + '.' + name).yellow + '` since dependencies are missing');
+      // console.log('deffering execution of `' + (r.name + '.' + name).yellow + '` since dependencies are missing');
       return;
     }
 
