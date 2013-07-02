@@ -587,7 +587,7 @@ function addMethod(r, name, method, schema, tap) {
             //
             if (err) {
               console.log('about to throw an error from ' + r.name + '.' + name + ' since no callback was provided and an async error occurred!');
-              logger.help('adding a callback argument to ' + r.name + '.' + name + ' will prevent this throw from happening');
+              console.log('adding a callback argument to ' + r.name + '.' + name + ' will prevent this throw from happening');
               throw err;
             }
             //
@@ -853,29 +853,10 @@ resource.schema = {
   properties: {}
 };
 
-//
-// Override original logger with new logger resource
-// TODO: cleanup override logic
-// resource.logger = _logger;
-
-//
-// Preserve old logging levels
-//
-//for (var level in logger.levels) {
-//  resource.logger[level] = logger[level];
-//}
-
-//resource.logger.put = logger.put;
-
-//
-// end logger resource
-//
-
 resource.methods = [];
 resource.name = "resource";
 
 module['exports'] = resource;
 
 // hard-code the use of logger into resource core ( fow now )
-// TODO: remove all need for console.logging in core
 var logger = resource.use('logger');
