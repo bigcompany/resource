@@ -786,7 +786,7 @@ resource.invoke = function (method, data, callback) {
   //
   // If any data was passed in
   //
-  if (Object.keys(data).length > 0) {
+  if (typeof data === 'object' && Object.keys(data).length > 0) {
 
     //
     // If an options hash is expected as part of the resource method schema
@@ -804,7 +804,10 @@ resource.invoke = function (method, data, callback) {
       args.push(callback);
       result = method.apply(this, args);
     }
-  } else {
+  } else if (typeof data !== 'undefined' && typeof data !== 'function') {
+    result = method.call(this, data, callback);
+  }
+  else {
     //
     // No data was passed in, execute the resource method with no data
     //
