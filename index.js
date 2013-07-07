@@ -24,6 +24,7 @@ var helper = resource.helper = require('./lib/helper');
 resource.env = process.env.NODE_ENV || 'development';
 
 resource.isResource = resource.helper.isResource;
+resource.version = "0.4.1";
 
 resource.installing = {};
 resource._queue = [];
