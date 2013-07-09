@@ -798,8 +798,10 @@ resource.invoke = function (method, data, callback) {
       // If no options hash is expected, curry the arguments left to right into an array
       //
       var args = [];
-      for (var p in data) {
-        args.push(data[p]);
+      for (var p in method.schema.properties) {
+        if (data[p]) {
+          args.push(data[p]);
+        }
       }
       args.push(callback);
       result = method.apply(this, args);
