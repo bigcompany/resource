@@ -887,3 +887,33 @@ var logger = resource.use('logger');
 
 // hard-code the use of validator into resource core ( fow now )
 var validator = resource.use('validator');
+
+//
+// Attempt to load resources from the currrent applications folder + /resources/
+//
+var resourcesPath = process.cwd() + '/resources/';
+
+//
+// Filter out any potential non-resource files / folders
+//
+var _resources = [], fs = require('fs');
+
+try {
+  _resources = fs.readdirSync(resourcesPath);
+} catch (err) {
+  console.log('err', err);
+}
+
+_resources = _resources.filter(function (val) {
+  var _isResource = false;
+  val = resourcesPath + val;
+  _isResource = resource.isResource(val);
+  return _isResource;
+});
+
+//
+// For every resource, use it and export it
+//
+_resources.forEach(function (r) {
+  resource.use(r);
+});
