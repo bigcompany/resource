@@ -331,7 +331,6 @@ function addMethod(r, name, method, schema, tap) {
       resource.install(r, resource);
     }
 
-
     if (Object.keys(resource.installing).length > 0) {
       resource._queue.unshift(function () {
         fn.apply(this, args);
@@ -864,12 +863,16 @@ resource.resource = resource.define('resource', resource);
 //
 // Add a load method for resource, mount it on the top-level resource scope
 //
-resource.load = resource.resource.method('load', require('./lib/load'), {});
+//resource.load = resource.resource.method('load', require('./lib/load'), {});
+resource.load = require('./lib/load');
 
 //
 // Resource.use is the most the basic bootstraping / dependency injection method,
 // `resource.use` can now used to compose additional functionality with new sources
 //
+resource.use = require('./lib/use');
+
+/*
 resource.use = resource.resource.method('use', require('./lib/use'), {
   "description": "use a resource",
   "properties": {
@@ -877,6 +880,7 @@ resource.use = resource.resource.method('use', require('./lib/use'), {
     "options": { type: "object" }
   },
 });
+*/
 
 // hard-code the use of logger into resource core ( fow now )
 var logger = resource.use('logger');
