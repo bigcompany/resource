@@ -16,15 +16,6 @@ resource = new EventEmitter({
   maxListeners: 20, // the max number of listeners that can be assigned to an event
 });
 
-resource.load = require('./lib/load');
-
-//
-// Resource.use is the most the basic bootstraping / dependency injection method,
-// `resource.use` can now used to compose additional functionality with new sources
-//
-resource.use = require('./lib/use');
-
-
 var helper = resource.helper = require('./lib/helper');
 
 //
@@ -33,6 +24,7 @@ var helper = resource.helper = require('./lib/helper');
 resource.env = process.env.NODE_ENV || 'development';
 
 resource.isResource = resource.helper.isResource;
+resource.version = "0.4.1";
 
 resource.installing = {};
 resource._queue = [];
@@ -151,7 +143,7 @@ resource.define = function (name, options) {
     if (typeof method !== 'function') {
       throw new Error('a function is required as the second argument to `resource.method()`');
     }
-    addMethod(r, name, method, schema);
+    return addMethod(r, name, method, schema);
   };
 
   //
@@ -229,10 +221,11 @@ resource.define = function (name, options) {
 
 };
 
-resource.before = [];
+resource._before = [];
+
 
 //
-// For attaching module-scoped Resource.before hooks onto all resources.
+// For attaching module-scoped Resource._before hooks onto all resources.
 // This differs from calling .before on a resource instance such as creature.before('create'),
 // in that resource.beforeAll(fn) hooks will execute before all resource methods
 //
@@ -240,7 +233,7 @@ resource.beforeAll = function (callback) {
   //
   // Method exists on resource, push this new hook callback
   //
-  resource.before.unshift(callback);
+  resource._before.unshift(callback);
 };
 
 //
@@ -378,8 +371,8 @@ function addMethod(r, name, method, schema, tap) {
     //
     function beforeAllHooks(cb) {
       var hooks;
-      if (Array.isArray(resource.before) && resource.before.length > 0) {
-        hooks = resource.before.slice();
+      if (Array.isArray(resource._before) && resource._before.length > 0) {
+        hooks = resource._before.slice();
         function iter() {
           var hook = hooks.pop();
           hook = hook.bind({ resource: r.name, method: name });
@@ -442,11 +435,6 @@ function addMethod(r, name, method, schema, tap) {
       //
       if (typeof schema === 'object') {
 
-        //
-        // A schema is present, so use the validator resource
-        //
-        var validator = resource.use('validator');
-
         var _instance = {},
             _data = {};
 
@@ -487,34 +475,35 @@ function addMethod(r, name, method, schema, tap) {
         // Create a new schema instance with default values, mixed in with supplied arguments data
         //
         _instance = resource.instantiate(schema, _data);
-
         //
         // Perform a schema validation on the new instance to ensure validity
         //
-        var validate = validator.validate.unwrapped(_instance, schema);
+        if (validator) {
+          var validate = validator.validate.unwrapped(_instance, schema);
 
-        //
-        // If the schema validation fails, do not fire the wrapped method
-        //
-        if (!validate.valid) {
           //
-          // Create an error of type Error
+          // If the schema validation fails, do not fire the wrapped method
           //
-          validationError = new Error(
-            'Invalid arguments for method `' + r.name + '.' + name + '`. '
-          );
-          validationError.errors = validate.errors;
-          validationError.message = validationError.message + JSON.stringify(validationError.errors, true, 2);
-
-          resource.emit(r.name + '::' + name + '::error', validationError);
-          if (typeof callback === 'function') {
+          if (!validate.valid) {
             //
-            // If a valid callback was provided, continue with the error
+            // Create an error of type Error
             //
+            validationError = new Error(
+              'Invalid arguments for method `' + r.name + '.' + name + '`. '
+            );
+            validationError.errors = validate.errors;
+            validationError.message = validationError.message + JSON.stringify(validationError.errors, true, 2);
 
-            return callback(validationError);
-          } else {
-            throw validationError;
+            resource.emit(r.name + '::' + name + '::error', validationError);
+            if (typeof callback === 'function') {
+              //
+              // If a valid callback was provided, continue with the error
+              //
+
+              return callback(validationError);
+            } else {
+              throw validationError;
+            }
           }
         }
 
@@ -662,9 +651,9 @@ function addMethod(r, name, method, schema, tap) {
       // Everything seems okay, execute the method with the modified arguments
       //
       var result = method.apply(this, _args);
-
       if (typeof callback !== 'function') {
         resource.emit(r.name + '::' + name, result);
+        afterHooks([null, result]);
       }
 
       //
@@ -677,6 +666,7 @@ function addMethod(r, name, method, schema, tap) {
     // Executes "after" hooks in FIFO (First-In-First-Out) Order
     //
     function afterHooks(args, cb) {
+      cb = cb || function noop(){};
       var hooks;
       if (Array.isArray(fn.after) && fn.after.length > 0) {
         hooks = fn.after.slice();
@@ -749,7 +739,10 @@ function addMethod(r, name, method, schema, tap) {
   // TODO: add warning / check for override of existing method if r[name] already exists as a function
   r[name] = fn;
 
+  return fn;
+
 }
+
 
 function addProperty(r, name, schema) {
 
@@ -863,5 +856,30 @@ resource.name = "resource";
 
 module['exports'] = resource;
 
+//
+// Define resource as a meta-resource
+//
+resource.resource = resource.define('resource', resource);
+
+//
+// Add a load method for resource, mount it on the top-level resource scope
+//
+resource.load = resource.resource.method('load', require('./lib/load'), {});
+
+//
+// Resource.use is the most the basic bootstraping / dependency injection method,
+// `resource.use` can now used to compose additional functionality with new sources
+//
+resource.use = resource.resource.method('use', require('./lib/use'), {
+  "description": "use a resource",
+  "properties": {
+    "resource": { type: "string" },
+    "options": { type: "object" }
+  },
+});
+
 // hard-code the use of logger into resource core ( fow now )
 var logger = resource.use('logger');
+
+// hard-code the use of validator into resource core ( fow now )
+var validator = resource.use('validator');
