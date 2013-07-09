@@ -1,6 +1,6 @@
 {
   "name": "resource",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "node.js resource",
   "repository" : {
     "type" : "git",
