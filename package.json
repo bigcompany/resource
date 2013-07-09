@@ -10,7 +10,6 @@
   "dependencies": {
     "eventemitter2": "*",
     "colors": "*",
-    "mkdirp": "~0.3.4",
     "which": "1.0.5"
   },
   "scripts": {
