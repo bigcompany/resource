@@ -2,6 +2,10 @@
   "name": "resource",
   "version": "0.4.1",
   "description": "node.js resource",
+  "repository" : {
+    "type" : "git",
+    "url" : "http://github.com/bigcompany/resource.git"
+  },
   "main": "index.js",
   "dependencies": {
     "eventemitter2": "*",
