@@ -901,7 +901,6 @@ var _resources = [], fs = require('fs');
 try {
   _resources = fs.readdirSync(resourcesPath);
 } catch (err) {
-  console.log('err', err);
 }
 
 _resources = _resources.filter(function (val) {
