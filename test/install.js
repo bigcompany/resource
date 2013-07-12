@@ -31,11 +31,15 @@ test("define Faker.fullName method", function (t) {
     }
   };
   faker.method('fullName', fullName);
-  t.ok(faker.fullName, "faker.color method defined");
+  t.ok(faker.fullName, "faker.fullName method defined");
   t.end();
 });
 
-test("call faker.fullName method", function (t) {
+test("sync call faker.fullName method", function (t) {
+  t.ok(faker.fullName(), "faker.fullName returned");
+});
+
+test("async call faker.fullName method", function (t) {
   faker.fullName(function(err, str) {
     t.ok(!err, "no error");
     t.ok(str, "faker.fullName returned");
