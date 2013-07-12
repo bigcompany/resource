@@ -37,6 +37,7 @@ test("define Faker.fullName method", function (t) {
 
 test("sync call faker.fullName method", function (t) {
   t.ok(faker.fullName(), "faker.fullName returned");
+  t.end();
 });
 
 test("async call faker.fullName method", function (t) {
