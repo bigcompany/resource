@@ -778,7 +778,7 @@ resource.invoke = function (method, data, callback) {
   //
   // If any data was passed in
   //
-  if (typeof data === 'object' && Object.keys(data).length > 0) {
+  if (typeof data === 'object') {
 
     //
     // If an options hash is expected as part of the resource method schema
@@ -798,7 +798,7 @@ resource.invoke = function (method, data, callback) {
       args.push(callback);
       result = method.apply(this, args);
     }
-  } else if (typeof data !== 'undefined' && typeof data !== 'object') {
+  } else if (typeof data !== 'undefined') {
     result = method.call(this, data, callback);
   }
   else {
