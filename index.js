@@ -798,7 +798,7 @@ resource.invoke = function (method, data, callback) {
       args.push(callback);
       result = method.apply(this, args);
     }
-  } else if (typeof data !== 'undefined' && typeof data !== 'function') {
+  } else if (typeof data !== 'undefined' && typeof data !== 'object') {
     result = method.call(this, data, callback);
   }
   else {
