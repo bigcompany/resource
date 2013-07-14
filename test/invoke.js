@@ -69,3 +69,21 @@ test("invoke get with extra options", function (t) {
     t.end();
   });
 });
+
+test("invoke all with undefined data", function(t) {
+  resource.invoke(creature.all, undefined, function(err, result) {
+    t.equal(err, null, "no error");
+    t.equal(result.length, 1, "creature.all returns 1 creature");
+    t.equal(result[0].id, 'bob', "creature.all returns bob");
+    t.end();
+  });
+});
+
+test("invoke all with empty data", function(t) {
+  resource.invoke(creature.all, {}, function(err, result) {
+    t.equal(err, null, "no error");
+    t.equal(result.length, 1, "creature.all returns 1 creature");
+    t.equal(result[0].id, 'bob', "creature.all returns bob");
+    t.end();
+  });
+});
