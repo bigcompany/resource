@@ -178,7 +178,7 @@ test("executing creature.create - when already created", function (t) {
     items: items // array property current has serialization issue
   }, function (err, result) {
     t.type(err, 'object', 'an error');
-    t.equal(!result, true, 'no result');
+    t.equal(result.id, 'bobby', 'bobby already exists');
     t.equal(err.message, 'bobby already exists', 'bobby already exists');
     t.end();
   });
