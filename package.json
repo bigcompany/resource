@@ -10,7 +10,8 @@
   "dependencies": {
     "eventemitter2": "*",
     "colors": "*",
-    "which": "1.0.5"
+    "which": "1.0.5",
+	"resources": "*"
   },
   "scripts": {
     "test": "tap test/"
