@@ -184,6 +184,25 @@ test("executing creature.create - when already created", function (t) {
   });
 });
 
+test("executing creature.create - without an id", function (t) {
+  creature.create({
+    metadata: data,
+    items: items // array property currently has serialization issue
+  }, function (err, result) {
+    t.type(err, 'null', 'no error');
+    t.type(result, 'object', 'result is object');
+    t.type(result.metadata, 'object', 'metadata is object');
+    t.equal(result.moreItems[0], 'a', 'default array item set');
+    t.equal(result.metadata.foo, 'bar');
+    t.equal(result.metadata.abc, 123);
+    t.equal(result.metadata.data.prop1, 'foo');
+    t.equal(result.metadata.data.prop2, 'bar');
+    t.type(result.items, Array, 'items is array');
+    t.type(result.itemsNoDefault, Array, 'items is array');
+    t.end();
+  });
+})
+
 test("executing creature.get", function (t) {
   creature.get('bobby', function (err, result) {
     t.type(err, 'null', 'no error');
@@ -200,7 +219,7 @@ test("executing creature.get", function (t) {
 
 test("executing creature.all", function (t) {
   creature.all(function (err, result) {
-    t.equal(result.length, 1, 'one creature');
+    t.equal(result.length, 2, 'one creature');
     t.end();
   });
 });
@@ -227,7 +246,7 @@ test("executing creature.get", function (t) {
 
 test("executing creature.all", function (t) {
   creature.all(function (err, result) {
-    t.equal(result.length, 1);
+    t.equal(result.length, 2);
     t.end();
   });
 });
@@ -369,7 +388,7 @@ test("executing creature.get", function (t) {
 
 test("executing creature.all", function (t) {
   creature.all(function (err, result) {
-    t.equal(result.length, 0, 'no creatures');
+    t.equal(result.length, 1, 'no creatures');
     t.end();
   });
 });
