@@ -244,6 +244,11 @@ resource.beforeAll = function (callback) {
 resource.install = require('./lib/install');
 
 //
+// Aggregate start method
+//
+resource.start = require('./lib/start');
+
+//
 // Creates a new instance of a schema based on default data as arguments array
 //
 var instantiate = resource.instantiate = function (schema, levelData) {
