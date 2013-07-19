@@ -1,5 +1,5 @@
 //
-// Tests the resource.invoke method
+// Tests the resource.helper.invoke method
 //
 
 var tap = require("tap")
@@ -56,7 +56,7 @@ test("create a new creature", function (t) {
 });
 
 test("invoke find with options id ", function (t) {
-  resource.invoke(creature.find, { id: 'bob' }, function(err, result){
+  resource.helper.invoke(creature.find, { id: 'bob' }, function(err, result){
     t.equal(err, null);
     t.equal(result.length, 1);
     t.equal(result[0].id, 'bob');
@@ -66,7 +66,7 @@ test("invoke find with options id ", function (t) {
 });
 
 test("invoke get with id", function (t) {
-  resource.invoke(creature.get, 'bob', function(err, result){
+  resource.helper.invoke(creature.get, 'bob', function(err, result){
     t.equal(err, null);
     t.equal(result.id, 'bob');
     t.equal(result.name, 'bobby d');
@@ -75,7 +75,7 @@ test("invoke get with id", function (t) {
 });
 
 test("invoke get with options id", function (t) {
-  resource.invoke(creature.get, { id: 'bob' }, function(err, result){
+  resource.helper.invoke(creature.get, { id: 'bob' }, function(err, result){
     t.equal(err, null);
     t.equal(result.id, 'bob');
     t.equal(result.name, 'bobby d');
@@ -84,7 +84,7 @@ test("invoke get with options id", function (t) {
 });
 
 test("invoke get with extra options", function (t) {
-  resource.invoke(creature.get, {id: 'bob', name: 'bobby d'}, function(err, result){
+  resource.helper.invoke(creature.get, {id: 'bob', name: 'bobby d'}, function(err, result){
     t.equal(err, null);
     t.equal(result.id, 'bob');
     t.equal(result.name, 'bobby d');
@@ -93,7 +93,7 @@ test("invoke get with extra options", function (t) {
 });
 
 test("invoke all with undefined data", function (t) {
-  resource.invoke(creature.all, undefined, function(err, result) {
+  resource.helper.invoke(creature.all, undefined, function(err, result) {
     t.equal(err, null, "no error");
     t.equal(result.length, 1, "creature.all returns 1 creature");
     t.equal(result[0].id, 'bob', "creature.all returns bob");
@@ -102,7 +102,7 @@ test("invoke all with undefined data", function (t) {
 });
 
 test("invoke all with empty data", function (t) {
-  resource.invoke(creature.all, {}, function(err, result) {
+  resource.helper.invoke(creature.all, {}, function(err, result) {
     t.equal(err, null, "no error");
     t.equal(result.length, 1, "creature.all returns 1 creature");
     t.equal(result[0].id, 'bob', "creature.all returns bob");
@@ -111,7 +111,7 @@ test("invoke all with empty data", function (t) {
 });
 
 test("invoke start with empty data", function (t) {
-  resource.invoke(creature.start, {}, function(err, result) {
+  resource.helper.invoke(creature.start, {}, function(err, result) {
     t.equal(err, null, "no error");
     t.equal(result, "started", "creature.start returns started");
     t.end();
@@ -119,7 +119,7 @@ test("invoke start with empty data", function (t) {
 });
 
 test("invoke update with data", function (t) {
-  resource.invoke(creature.update, {id: 'bob', name: 'bobby g'}, function(err, result) {
+  resource.helper.invoke(creature.update, {id: 'bob', name: 'bobby g'}, function(err, result) {
     t.equal(err, null);
     t.equal(result.id, 'bob');
     t.equal(result.name, 'bobby g');

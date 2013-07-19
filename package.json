@@ -18,6 +18,9 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "tap": "~0.3.3"
+    "tap": "~0.3.3",
+    "async": "*",
+    "node-uuid": "*",
+    "mkdirp": "*"
   }
 }
