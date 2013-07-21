@@ -8,6 +8,7 @@
   },
   "main": "index.js",
   "dependencies": {
+    "node-uuid": "*",
     "eventemitter2": "*",
     "colors": "*",
     "which": "1.0.5",
