@@ -1,0 +1,24 @@
+{
+  "name": "resource",
+  "repo": "bigcompany/resource",
+  "description": "",
+  "version": "0.0.1",
+  "keywords": [],
+  "dependencies": {
+    "hij1nx/eventemitter2": "*",
+    "mschema/mschema-rpc": "*"
+  },
+  "development": {},
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": [
+    "index.js",
+    "lib/emit.js",
+    "lib/define.js",
+    "lib/helper.js",
+    "lib/method.js",
+    "lib/property.js",
+    "lib/start.js"
+  ],
+  "remotes": []
+}

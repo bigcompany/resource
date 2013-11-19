@@ -23,38 +23,24 @@ function fire (options, callback) {
 creature.method('poke', poke);
 
 creature.method('fire', fire, { 
-  "description": "fires a lazer at a certain power and direction",
-  "properties": {
-    "options": {
-      "type": "object",
-      "properties": {
-        "power": {
-          "type": "number",
-          "default": 1,
-          "required": true
-        },
-        "direction": {
-          "type": "string",
-          "enum": ["up", "down", "left", "right"],
-          "required": true,
-          "default": "up"
-        }
-      },
-      "callback": {
-        "type": "function",
-        "required": false
-      }
-    }
-}});
+  "power": {
+    "type": "number",
+    "default": 1,
+    "required": true
+  },
+  "direction": {
+    "type": "string",
+    "enum": ["up", "down", "left", "right"],
+    "required": true,
+    "default": "up"
+  }
+});
 
 creature.method('talk', talk, {
-  "description": "echos back a string",
-  "properties": {
-    "text": {
-      "type": "string",
-      "default": "hello!",
-      "required": true
-    }
+  "text": {
+    "type": "string",
+    "default": "hello!",
+    "required": true
   }
 });
 
@@ -62,10 +48,10 @@ creature.poke(function(err, result) {
   console.log(err, result)
 });
 
-creature.talk('hello', function(err, result) {
+creature.talk({ text: 'hello' }, function(err, result) {
   console.log(err, result)
 });
 
-creature.fire(function(err, result) {
+creature.fire({ }, function(err, result) {
   console.log(err, result)
 });
