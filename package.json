@@ -11,7 +11,6 @@
   "dependencies": {
     "mschema": "*",
     "mschema-rpc": "*",
-    "eventemitter2": "*",
     "jugglingdb": "0.2.4"
   },
   "scripts": {

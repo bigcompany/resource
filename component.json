@@ -5,7 +5,6 @@
   "version": "0.0.1",
   "keywords": [],
   "dependencies": {
-    "hij1nx/eventemitter2": "*",
     "mschema/mschema-rpc": "*"
   },
   "development": {},
@@ -16,7 +15,8 @@
     "lib/emit.js",
     "lib/define.js",
     "lib/method.js",
-    "lib/property.js"
+    "lib/property.js",
+    "vendor/eventemitter2.js"
   ],
   "remotes": []
 }

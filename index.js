@@ -1,7 +1,7 @@
 //
 // resource.js - resource module for node.js
 //
-var EventEmitter = require('EventEmitter2').EventEmitter2,
+var EventEmitter = require('./vendor/eventemitter2').EventEmitter2,
   resource = new EventEmitter({
     wildcard: true, // event emitter should use wildcards ( * )
     delimiter: '::', // the delimiter used to segment namespaces
