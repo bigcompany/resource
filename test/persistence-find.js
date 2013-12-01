@@ -1,5 +1,3 @@
-// TODO: change way ids are handled
-
 var tap = require("tap")
   , test = tap.test
   , plan = tap.plan
@@ -21,13 +19,7 @@ test("load creature resource - with memory datasource", function (t) {
 });
 
 testDatasource({ type: 'memory' });
-//testDatasource({ type: 'fs' });
-
-//
-// TODO: add feature detection / better test configuration for testing diffirent datasources
-// If a user attempts to run the couch tests without a running couch, they will error with a non-descript message
-//
-// testDatasource({ type: 'couch', name: 'big-test' });
+//testDatasource({ type: 'couch' });
 
 function testDatasource (config) {
 
@@ -64,7 +56,6 @@ function testDatasource (config) {
   test("find creatures with life 10 - with " + config.type + " datasource", function (t) {
     creature.find({ life: 10 }, function (err, creatures) {
       t.error(err, 'found creatures');
-
       t.equal(creatures.length, 2, 'found two creatures');
       t.end();
     });
@@ -73,7 +64,6 @@ function testDatasource (config) {
   test("find creatures with type dragon - with " + config.type + " datasource", function (t) {
     creature.find({ type: 'dragon' }, function (err, creatures) {
       t.error(err, 'found creatures');
-
       t.equal(creatures.length, 2, 'found two creatures');
       t.end();
     });
@@ -82,7 +72,6 @@ function testDatasource (config) {
   test("find creatures with life 10 and type dragon - with " + config.type + " datasource", function (t) {
     creature.find({ life: 10, type: 'dragon' }, function (err, creatures) {
       t.error(err, 'found creatures');
-
       t.equal(creatures.length, 1, 'found one creature');
       t.end();
     });
@@ -90,9 +79,11 @@ function testDatasource (config) {
 
   test("destroy all creatures - with " + config.type + " datasource", function (t) {
     t.plan(creatures.length);
-    creatures.forEach(function (c) {
-      creature.destroy(c.id, function (err) {
-        t.error(err, 'destroyed creature ' + c.id);
+    creature.all(function(err, results){
+      results.forEach(function (c) {
+        creature.destroy(c.id, function (err) {
+          t.error(err, 'destroyed creature ' + c.id);
+        });
       });
     });
   });

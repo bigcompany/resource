@@ -1,7 +1,8 @@
 {
   "name": "resource",
   "version": "0.5.0",
-  "description": "node.js resource",
+  "description": "node.js resource library",
+  "keywords": ["resource", "model", "controller", "mschema", "contracts"],
   "repository" : {
     "type" : "git",
     "url" : "http://github.com/bigcompany/resource.git"
@@ -11,16 +12,14 @@
     "mschema": "*",
     "mschema-rpc": "*",
     "eventemitter2": "*",
-    "loopback-datasource-juggler": "*"
+    "jugglingdb": "0.2.4"
   },
   "scripts": {
     "test": "tap test/"
   },
   "license": "MIT",
+  "author": "Marak Squires <support@marak.com>",
   "devDependencies": {
-    "tap": "0.4.x",
-    "async": "*",
-    "node-uuid": "*",
-    "mkdirp": "*"
+    "tap": "0.4.x"
   }
 }

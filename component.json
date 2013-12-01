@@ -15,10 +15,8 @@
     "index.js",
     "lib/emit.js",
     "lib/define.js",
-    "lib/helper.js",
     "lib/method.js",
-    "lib/property.js",
-    "lib/start.js"
+    "lib/property.js"
   ],
   "remotes": []
 }

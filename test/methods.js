@@ -26,7 +26,7 @@ test("define method on creature - with no method", function (t) {
 test("define method on creature - with schema - valid input", function (t) {
   creature.method('talk', function (options, callback) {
     callback(null, options.text);
-  }, { "text" : "string" });
+  }, { input: { "text" : "string" }});
   creature.talk({ text: "hi" }, function(err, result){
     t.equal(result, 'hi');
     t.end();
@@ -36,13 +36,13 @@ test("define method on creature - with schema - valid input", function (t) {
 test("define method on creature - with schema - invalid input", function (t) {
   creature.method('talk', function (options, callback) {
     callback(null, options.text);
-  }, { "text" : "string" });
+  }, { input: { "text" : "string" }});
   creature.talk({ text: 123 }, function(err, result){
     t.type(err, Object);
-    t.type(err, Array);
-    t.equal(err[0].property, 'text');
-    t.equal(err[0].expected, 'string');
-    t.equal(err[0].actual, 'number');
+    t.type(result, Array);
+    t.equal(result[0].property, 'text');
+    t.equal(result[0].expected, 'string');
+    t.equal(result[0].actual, 'number');
     t.end();
   });
 });

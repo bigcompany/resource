@@ -25,7 +25,14 @@ test("define property on creature - with no schema", function (t) {
   t.end()
 });
 
-test("define property on creature - with schema", function (t) {
+test("define property on creature - with schema as string", function (t) {
+  creature.property('life', 'number');
+  t.type(creature.schema.properties.life, 'object', 'property defined - schema.properties.title is object');
+  t.equal(creature.schema.properties.life.type, 'number', 'property defined - schema.properties.title.type is string');
+  t.end();
+});
+
+test("define property on creature - with schema as object", function (t) {
   creature.property('title', {
     "type": "string"
   });

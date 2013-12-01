@@ -4,9 +4,14 @@
   </head>
   <body>
     <h1>example</h1>
-    
     <script type="text/javascript">
       var resource = require('resource');
+      var weapon = resource.define('weapon');
+      function fire () {
+        alert('weapon fired!');
+      };
+      weapon.method('fire', fire);
+      weapon.fire();
       console.log(resource);
     </script>
   </body>

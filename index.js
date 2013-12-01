@@ -9,7 +9,7 @@ var EventEmitter = require('EventEmitter2').EventEmitter2,
   });
 
 // current version of the resource engine
-resource.version = "0.4.3";
+resource.version = "0.5.0";
 
 if(typeof process === 'undefined') {
   process = {
@@ -32,44 +32,23 @@ resource.emit = require('./lib/emit');
 // for defining new resources
 resource.define = require('./lib/define');
 
-// helpers for dealing with resources
-resource.helper = require('./lib/helper');
-
-// aggregate start method for starting all loaded resources
-resource.start = require('./lib/start');
-
 // adds a function to the resource as a resource method
 resource._addMethod = require('./lib/method');
 
 // adds a property to the resource as a resource property
 resource._addProperty = require('./lib/property');
 
-
-// TODO: port loopback-datasource-juggler to browser using component
+// TODO: Setup datasource connector for browser
 if (typeof process.env.BROWSER_ENV === 'undefined') {
   // adds persist methods for persisting resource instances into datasources
   resource.datasource = require('./lib/datasource');
 }
 
-resource._queue = [];
-resource._before = [];
 
-//
-// For attaching module-scoped Resource._before hooks onto all resources.
-// This differs from calling .before on a resource instance such as creature.before('create'),
-// in that resource.beforeAll(fn) hooks will execute before all resource methods
-//
+// resource.beforeAll() event hooks
+resource._before = [];
 resource.beforeAll = function (callback) {
-  //
-  // Method exists on resource, push this new hook callback
-  //
   resource._before.unshift(callback);
 };
-
-resource.schema = {
-  properties: {}
-};
-resource.methods = [];
-resource.name = "resource";
 
 module['exports'] = resource;

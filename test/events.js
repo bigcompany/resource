@@ -20,7 +20,7 @@ test("define method on creature - with no schema - invoke with string argument",
   creature.method('talk', function(options, callback){
     console.log(options.text.red)
     callback(null, options.text);
-  }, { text: 'string' });
+  }, { input: { text: 'string' }});
 
   t.plan(4);
 

@@ -1,8 +1,10 @@
-// tests for before and after hooks on resource methods
-
+//
+// Tests for before and after hooks on resource methods
+//
 var tap = require("tap")
   , test = tap.test
   , plan = tap.plan
+  , id
   , creature
   , resource;
 
@@ -33,6 +35,7 @@ test("adding creature.before('create')", function (t) {
   });
   t.equal(creature.create.before.length, 1);
   creature.create({ name: 'bobby' }, function (err, result) {
+    id = result.id;
     t.type(err, "null", 'creature.before("create") applied - no error');
     t.equal(result.name, 'larry', 'creature.before("create") applied - result.name == "larry"');
     t.end();
@@ -52,23 +55,6 @@ test("adding another creature.before('create')", function (t) {
   });
 });
 
-test("run it again", function (t) {
-  t.plan(3);
-  //
-  // Because create throws when the instance already exists, we need to destroy
-  // any instances that already exist
-  //
-  creature.destroy(1, function (err) {
-    t.equal(!err, true, 'destroyed instance of larry-a');
-    creature.create({ name: 'bobby' }, function (err, result) {
-      t.type(err, "null", 'second creature.before("create") still applied - no error');
-      t.equal(result.name, 'larry-a', 'second creature.before("create") still applied - result.name == "larry-a"');
-      t.end();
-    });
-  });
-});
-
-
 
 test("adding another creature.before('create')", function (t) {
   creature.before('create', function (data, next) {
@@ -78,22 +64,8 @@ test("adding another creature.before('create')", function (t) {
   t.equal(creature.create.before.length, 3);
   creature.create({ name: 'bobby' }, function (err, result) {
     t.type(err, "null", 'third creature.before("create") applied - no error');
-    console.log('rrr', result)
     t.equal(result.name, 'larry-a-b', 'third creature.before("create") applied - result.name == "larry-a-b"');
     t.end();
-  });
-});
-
-
-test("run it again", function (t) {
-  t.plan(3);
-  creature.destroy('larry-a-b', function (err) {
-    t.equal(!err, true, 'destroyed instance of larry-a-b');
-    creature.create({ name: 'bobby' }, function (err, result) {
-      t.type(err, "null", 'third creature.before("create") still applied - no error');
-      t.equal(result.name, 'larry-a-b', 'third creature.before("create") still applied - result.name == "larry-a-b"');
-      t.end();
-    });
   });
 });
 
@@ -111,32 +83,20 @@ test("remove before hooks on creature.create - run creature.create", function (t
 
 test("adding creature.before('poke') and creature.after('poke') - before creature.poke is defined", function (t) {
   creature.before('poke', function (data, next) {
-    data = "poked";
+    data.text = "poked!";
     return next(null, data);
   });
   creature.after('poke', function (data, next) {
-    data += '!';
+    data.text += '!';
     return next(null, data);
   });
   t.equal(creature.methods.poke.before.length, 1, 'before hook for "poke" still defined');
-  creature.method('poke', function(data, callback){
+  creature.method('poke',  function (data, callback) {
     callback(null, data);
-  });
-  creature.poke('poked', function (err, data) {
+  }, { input: { "text" : "string" }});
+  creature.poke({ text: "poked" }, function (err, data) {
     t.ok(!err, 'poked! - no error');
-    t.equal(data, 'poked!', 'poked! - result is "poked!"');
-    t.end();
-  });
-});
-
-
-test("defining and running creature.poke", function (t) {
-  creature.method('poke', function(data, callback){
-    callback(null, data);
-  });
-  creature.poke('poked!', function (err, data) {
-    t.ok(!err, 'poked! - no error');
-    t.equal('poked!', data, 'poked! - result is "poked!"');
+    t.equal(data.text, 'poked!!', 'poked! - result is "poked!"');
     t.end();
   });
 });
@@ -153,25 +113,6 @@ test("adding creature.after('create')", function (t) {
     t.end();
   });
 });
-
-
-test("adding another creature.after('create')", function (t) {
-  t.plan(5);
-  t.equal(creature.create.after.length, 1);
-  creature.after('create', function (data, next) {
-    t.equal('jimmy', data.name, 'added second after hook - data.name == "jimmy"');
-    next(null, data);
-  });
-  t.equal(creature.create.after.length, 2, 'added second after hook - after.length == 2');
-  creature.destroy(1, function(err) {
-    t.type(err, "null", 'destroyed instance of jimmy');
-    creature.create({ name: 'jimmy' }, function (err, result) {
-      t.type(err, "null", 'callback fired - no error');
-      t.end();
-    });
-  });
-});
-
 
 test("define vehicle resource - with datasource config - and before and after hooks added on same tick", function (t) {
   vehicle = resource.define('vehicle', { config: { datasource: 'memory' }});
