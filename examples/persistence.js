@@ -3,8 +3,12 @@ var resource = require('../'),
 
 creature.persist('memory'); // could also try, creature.persist('fs')
 
+// add some properties
 creature.property('name');
 creature.property('type');
+
+// add ctime and mtime timestamps
+creature.timestamps();
 
 creature.create({ name: 'bobby', type: 'dragon' }, function (err, result) {
   console.log(err);
