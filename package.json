@@ -1,6 +1,6 @@
 {
   "name": "resource",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "node.js resource library",
   "keywords": ["resource", "model", "controller", "mschema", "contracts"],
   "repository" : {
