@@ -37,6 +37,8 @@ test("define creature resource - with datasource config", function (t) {
 
   creature.property('name', "string");
   creature.property('life', "number");
+  creature.property('type', "string");
+
   creature.property('metadata', {"type": "object"});
   creature.property('items', []);
   creature.property('moreItems', []);
@@ -120,6 +122,7 @@ test("executing creature.create", function (t) {
   creature.create({
     name: 'bobby',
     life: 10,
+    type: 'dragon',
     metadata: data,
     items: items,
     moreItems: ["a"]
@@ -174,7 +177,30 @@ test("executing creature.create - with bad input", function (t) {
 });
 
 test("executing creature.update", function (t) {
-  creature.update({ id: id, name: 'bobby', life: 9999 , items: items }, function (err, result) {
+  creature.update({ id: id, name: 'dave' }, function (err, result) {
+    t.type(err, 'null', 'updated dave - no error');
+    t.type(result, 'object', 'updated dave - result is object');
+    t.equal(result.name, "dave", 'updated dave - result.name == dave');
+    t.equal(result.life, 10, 'updated dave - result.life == 10');
+    t.equal(result.type, "dragon", 'updated dave - result.type == dragon');
+    t.type(result.items.items, Array, 'items is array');
+    t.end();
+  });
+});
+
+test("executing creature.update", function (t) {
+  creature.update({ id: id, name: 'bobby', life: 9999, items: items }, function (err, result) {
+    t.type(err, 'null', 'updated bobby - no error');
+    t.type(result, 'object', 'updated bobby - result is object');
+    t.equal(result.life, 9999, 'updated bobby - result.life == 9999');
+    t.equal(result.type, "dragon", 'updated bobby - result.type == dragon');
+    t.type(result.items.items, Array, 'items is array');
+    t.end();
+  });
+});
+
+test("executing creature.get to check updated data", function (t) {
+  creature.get(id, function (err, result) {
     t.type(err, 'null', 'updated bobby - no error');
     t.type(result, 'object', 'updated bobby - result is object');
     t.equal(result.life, 9999, 'updated bobby - result.life == 9999');
