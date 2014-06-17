@@ -1,5 +1,7 @@
 # resource
 
+<img src="https://travis-ci.org/bigcompany/resource.svg?branch=master"/>
+
 A resource can be considered a combination of a Model and a Controller. Resource methods can have associated schemas which act as a contract for the input and output of the method. Using resources provides unified invocation and validation of all function arguments and results.
 
 ## Features
