@@ -4,9 +4,10 @@ var resource = require('../'),
 function poke (callback) {
   return callback(null, 'poked!');
 }
-function talk (text, callback) {
+function talk (options, callback) {
+  console.log(options.text)
   var result = {
-    text: text,
+    text: options.text,
     status: 200
   }
   return callback(null, result);
@@ -43,6 +44,9 @@ creature.method('talk', talk, {
     "required": true
   }
 });
+creature.on('talk', function (data){
+  console.log('talk event fired', data)
+})
 
 creature.poke(function(err, result) {
   console.log(err, result)
@@ -52,6 +56,5 @@ creature.talk({ text: 'hello' }, function(err, result) {
   console.log(err, result)
 });
 
-creature.fire({ }, function(err, result) {
-  console.log(err, result)
-});
+creature.emit('talk', { text: "goodbye"})
+
