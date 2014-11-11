@@ -10,8 +10,7 @@
   "main": "index.js",
   "dependencies": {
     "mschema": "*",
-    "mschema-rpc": "*",
-    "jugglingdb": "0.2.4"
+    "mschema-rpc": "*"
   },
   "scripts": {
     "test": "tap test/"
