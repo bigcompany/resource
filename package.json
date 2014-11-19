@@ -11,7 +11,8 @@
   "dependencies": {
     "mschema": "*",
     "mschema-rpc": "*",
-    "jugglingdb": "0.2.4"
+    "jugglingdb": "0.2.4",
+    "jugglingdb-nano": "https://github.com/Marak/nano-adapter/tarball/master"
   },
   "scripts": {
     "test": "tap test/"
