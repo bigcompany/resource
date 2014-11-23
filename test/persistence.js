@@ -6,7 +6,7 @@ var tap = require("tap")
   , id
   , resource;
 
-var testDatasource = "memory";
+var testDatasource = 'http://127.0.0.1:5984/resource';
 
 test("load resource module", function (t) {
   resource = require('../');

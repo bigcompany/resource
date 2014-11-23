@@ -2,15 +2,22 @@
   "name": "resource",
   "version": "0.5.3",
   "description": "node.js resource library",
-  "keywords": ["resource", "model", "controller", "mschema", "contracts"],
-  "repository" : {
-    "type" : "git",
-    "url" : "http://github.com/bigcompany/resource.git"
+  "keywords": [
+    "resource",
+    "model",
+    "controller",
+    "mschema",
+    "contracts"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/bigcompany/resource.git"
   },
   "main": "index.js",
   "dependencies": {
     "mschema": "*",
-    "mschema-rpc": "*"
+    "mschema-rpc": "*",
+    "nano": "^6.0.1"
   },
   "scripts": {
     "test": "tap test/"

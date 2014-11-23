@@ -1,7 +1,7 @@
 var resource = require('../'),
     creature = resource.define('creature');
 
-creature.persist('memory'); // could also try, creature.persist('fs')
+creature.persist('http://127.0.0.1:5984/resource');
 
 // add some properties
 creature.property('name');
