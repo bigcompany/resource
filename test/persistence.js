@@ -4,6 +4,7 @@ var tap = require("tap")
   , account
   , creature
   , id
+  , secondId
   , resource;
 
 var testDatasource = "memory";
@@ -35,7 +36,7 @@ test("define creature resource - with datasource config", function (t) {
   creature = resource.define('creature');
   creature.persist(testDatasource);
 
-  creature.property('name', "string");
+  creature.property('name', { type: "string", unique: true });
   creature.property('life', "number");
   creature.property('type', "string");
 
@@ -142,6 +143,80 @@ test("executing creature.create", function (t) {
   });
 });
 
+test("executing creature.update with unique creature name on same creature", function (t) {
+  creature.updateOrCreate({ id: id, name: 'bobby'}, function (err, res){
+    t.type(err, 'null', 'no error');
+    t.end();
+  })
+});
+
+test("executing creature.create with conflicting unique creature name", function (t) {
+  creature.create({
+    name: 'bobby',
+    life: 10,
+    type: 'dragon',
+    metadata: data,
+    items: items,
+    moreItems: ["a"]
+  }, function (err, result) {
+    t.type(err, 'object');
+    t.end();
+  });
+});
+
+test("executing creature.updateOrCreate with conflicting unique creature name", function (t) {
+  creature.updateOrCreate({
+    name: 'bobby',
+    life: 10,
+    type: 'dragon',
+    metadata: data,
+    items: items,
+    moreItems: ["a"]
+  }, function (err, result) {
+    t.type(err, 'object');
+    t.end();
+  });
+});
+
+test("executing creature.create with a new creature", function (t) {
+  creature.create({
+    name: 'larry',
+    life: 20,
+    type: 'unicorn',
+    metadata: data,
+    items: items,
+    moreItems: ["b"]
+  }, function (err, result) {
+    t.type(err, 'null', 'no error');
+    secondId = result.id;
+    t.type(result, 'object', 'result is object');
+    t.equal(result.name, 'larry', 'name is correct');
+    t.type(result.metadata, 'object', 'metadata is object');
+    t.equal(result.metadata.foo, 'bar');
+    t.equal(result.metadata.abc, 123);
+    t.equal(result.metadata.data.prop1, 'foo');
+    t.equal(result.metadata.data.prop2, 'bar');
+    t.type(result.items.items, Array, 'items is array');
+    t.type(result.moreItems.items, Array, 'items is array');
+    t.end();
+  });
+});
+
+test("executing creature.updateOrCreate with id and conflicting unique creature name", function (t) {
+  creature.updateOrCreate({ id: secondId, name: 'bobby'}, function (err, res){
+    t.type(err, 'object');
+    console.log(err.message)
+    t.end();
+  })
+});
+
+test("executing creature.update with id and conflicting unique creature name", function (t) {
+  creature.update({ id: secondId, name: 'bobby'}, function (err, res){
+    t.type(err, 'object');
+    t.end();
+  })
+});
+
 test("executing creature.get", function (t) {
   creature.get(id, function (err, result) {
     t.type(err, 'null', 'no error');
@@ -158,7 +233,7 @@ test("executing creature.get", function (t) {
 
 test("executing creature.all", function (t) {
   creature.all(function (err, result) {
-    t.equal(result.length, 1, 'one creature');
+    t.equal(result.length, 2, 'two creatures');
     t.end();
   });
 });
@@ -220,6 +295,13 @@ test("executing create.update - when creature does not exist", function (t) {
 
 test("executing creature.destroy", function (t) {
   creature.destroy(id, function (err, result) {
+    t.type(result, 'null', 'destroyed bobby');
+    t.end();
+  });
+});
+
+test("executing creature.destroy", function (t) {
+  creature.destroy(secondId, function (err, result) {
     t.type(result, 'null', 'destroyed bobby');
     t.end();
   });
