@@ -47,4 +47,16 @@ test("define method on creature - with schema - invalid input", function (t) {
   });
 });
 
+test("attempt to call resource method with custom bound scope", function (t) {
+  creature.talk.call({ foo: "bar" }, { text: 123 }, function(err, result){
+    t.equal(this.foo, "bar")
+    t.type(err, Object);
+    t.type(result, Array);
+    t.equal(result[0].property, 'text');
+    t.equal(result[0].expected, 'string');
+    t.equal(result[0].actual, 'number');
+    t.end();
+  });
+});
+
 // for additional test coverage on resource.method see: mschema and mchema-rpc test suite

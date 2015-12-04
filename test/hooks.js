@@ -55,6 +55,13 @@ test("adding another creature.before('create')", function (t) {
   });
 });
 
+test("attempt to call creature.create with custom bound scope", function (t) {
+  creature.create.call({ foo: "bar" }, { name: 'jerry' }, function (err, result) {
+    t.type(err, "null", 'no errors');
+    t.equal(this.foo, "bar");
+    t.end();
+  });
+});
 
 test("adding another creature.before('create')", function (t) {
   creature.before('create', function (data, next) {

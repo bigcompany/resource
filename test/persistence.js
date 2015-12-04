@@ -112,9 +112,18 @@ test("define space resource - with datasource config", function(t) {
 
   t.end();
 });
+
 test("executing creature.all", function (t) {
   creature.all(function (err, result) {
     t.equal(result.length, 0, 'no creatures');
+    t.end();
+  });
+});
+
+test("executing creature.all with bound scope", function (t) {
+  creature.all.call({ foo: "bar" }, function (err, result) {
+    t.equal(result.length, 0, 'no creatures');
+    t.equal(this.foo, "bar")
     t.end();
   });
 });
