@@ -5,7 +5,7 @@ var EventEmitter = require('./vendor/eventemitter2').EventEmitter2,
   resource = new EventEmitter({
     wildcard: true, // event emitter should use wildcards ( * )
     delimiter: '::', // the delimiter used to segment namespaces
-    maxListeners: 20, // the max number of listeners that can be assigned to an event,
+    maxListeners: 999, // the max number of listeners that can be assigned to an event,
     newListener: true
   });
 
