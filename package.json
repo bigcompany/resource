@@ -10,7 +10,7 @@
   "main": "index.js",
   "dependencies": {
     "mschema": "*",
-    "mschema-rpc": "*",
+    "mschema-rpc": "0.6.x",
     "jugglingdb": "0.2.4",
     "jugglingdb-nano": "https://github.com/Marak/nano-adapter/tarball/master"
   },
