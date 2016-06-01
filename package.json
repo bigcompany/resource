@@ -2,17 +2,23 @@
   "name": "resource",
   "version": "0.5.7",
   "description": "node.js resource library",
-  "keywords": ["resource", "model", "controller", "mschema", "contracts"],
-  "repository" : {
-    "type" : "git",
-    "url" : "http://github.com/bigcompany/resource.git"
+  "keywords": [
+    "resource",
+    "model",
+    "controller",
+    "mschema",
+    "contracts"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/bigcompany/resource.git"
   },
   "main": "index.js",
   "dependencies": {
-    "mschema": "*",
-    "mschema-rpc": "0.6.x",
     "jugglingdb": "0.2.4",
-    "jugglingdb-nano": "https://github.com/Marak/nano-adapter/tarball/master"
+    "jugglingdb-nano": "https://github.com/Marak/nano-adapter/tarball/master",
+    "mschema": "*",
+    "mschema-rpc": "0.6.x"
   },
   "scripts": {
     "test": "tap test/"
