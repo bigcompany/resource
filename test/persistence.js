@@ -251,11 +251,11 @@ test("executing creature.create - with bad input", function (t) {
   creature.create({ life: "abc" }, function (err, result) {
     t.type(err, 'object', 'continues correct validation error - err is object');
     t.type(result, 'object', 'continues correct validation error - err.errors is object');
-    t.equal(result.length, 1, 'continues correct validation error - one validation error');
-    t.equal(result[0].constraint, 'type', 'continues correct validation error - attribute == "type"');
-    t.equal(result[0].property, 'life', 'continues correct validation error - property == "life"');
-    t.equal(result[0].expected, 'number', 'continues correct validation error - expected == "number"');
-    t.equal(result[0].actual, 'string', 'continues correct validation error - actual == "string"');
+    t.equal(result.errors.length, 1, 'continues correct validation error - one validation error');
+    t.equal(result.errors[0].constraint, 'type', 'continues correct validation error - attribute == "type"');
+    t.equal(result.errors[0].property, 'life', 'continues correct validation error - property == "life"');
+    t.equal(result.errors[0].expected, 'number', 'continues correct validation error - expected == "number"');
+    t.equal(result.errors[0].actual, 'string', 'continues correct validation error - actual == "string"');
     t.end();
   });
 });

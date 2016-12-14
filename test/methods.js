@@ -39,10 +39,11 @@ test("define method on creature - with schema - invalid input", function (t) {
   }, { input: { "text" : "string" }});
   creature.talk({ text: 123 }, function(err, result){
     t.type(err, Object);
-    t.type(result, Array);
-    t.equal(result[0].property, 'text');
-    t.equal(result[0].expected, 'string');
-    t.equal(result[0].actual, 'number');
+    t.type(result, Object);
+    t.type(result.errors, Array);
+    t.equal(result.errors[0].property, 'text');
+    t.equal(result.errors[0].expected, 'string');
+    t.equal(result.errors[0].actual, 'number');
     t.end();
   });
 });
@@ -51,10 +52,10 @@ test("attempt to call resource method with custom bound scope", function (t) {
   creature.talk.call({ foo: "bar" }, { text: 123 }, function(err, result){
     t.equal(this.foo, "bar")
     t.type(err, Object);
-    t.type(result, Array);
-    t.equal(result[0].property, 'text');
-    t.equal(result[0].expected, 'string');
-    t.equal(result[0].actual, 'number');
+    t.type(result.errors, Array);
+    t.equal(result.errors[0].property, 'text');
+    t.equal(result.errors[0].expected, 'string');
+    t.equal(result.errors[0].actual, 'number');
     t.end();
   });
 });
