@@ -307,14 +307,14 @@ test("executing create.update - when creature does not exist", function (t) {
 
 test("executing creature.destroy", function (t) {
   creature.destroy(id, function (err, result) {
-    t.type(result, 'null', 'destroyed bobby');
+    t.type(result, 'object', 'destroyed bobby');
     t.end();
   });
 });
 
 test("executing creature.destroy", function (t) {
   creature.destroy(secondId, function (err, result) {
-    t.type(result, 'null', 'destroyed bobby');
+    t.type(result, 'object', 'destroyed bobby');
     t.end();
   });
 });
