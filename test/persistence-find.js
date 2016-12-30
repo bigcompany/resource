@@ -18,8 +18,8 @@ test("load creature resource - with memory datasource", function (t) {
   t.end()
 });
 
-testDatasource({ type: 'memory' });
-//testDatasource({ type: 'couch' });
+testDatasource({ type: 'memory', username: 'admin', password: 'password' });
+//testDatasource({ type: 'couch2' });
 
 function testDatasource (config) {
 

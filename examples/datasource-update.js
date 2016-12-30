@@ -1,7 +1,7 @@
 var resource = require('../'),
     creature = resource.define('creature');
 
-creature.persist('couchdb'); // could also try, creature.persist('fs')
+creature.persist('couch2');
 
 // add some properties
 creature.property('name');
@@ -17,7 +17,16 @@ creature.create({ name: 'bobby', type: 'dragon' }, function (err, result) {
   console.log(result);
   console.log(result.id);
   console.log(result.type);
+  
+  creature.update({ id: result.id, name: 'bobby', type: 'unicorn' }, function (err, result) {
+    console.log(err);
+    console.log(result);
+    console.log(result.id);
+    console.log(result.type);
+  });
+  
 });
+
 
 //
 // PROTIP: Try console.log(creature.methods)

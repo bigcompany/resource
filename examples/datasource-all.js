@@ -1,7 +1,7 @@
 var resource = require('../'),
     creature = resource.define('creature');
 
-creature.persist('couchdb'); // could also try, creature.persist('fs')
+creature.persist('couchdb');
 
 // add some properties
 creature.property('name');
@@ -10,13 +10,9 @@ creature.property('type');
 // add ctime and mtime timestamps
 creature.timestamps();
 
-console.log(creature.model)
-
-creature.create({ name: 'bobby', type: 'dragon' }, function (err, result) {
+creature.all(function (err, results) {
   console.log(err);
-  console.log(result);
-  console.log(result.id);
-  console.log(result.type);
+  console.log(results);
 });
 
 //
