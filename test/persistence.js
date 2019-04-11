@@ -138,12 +138,14 @@ test("executing creature.create", function (t) {
     type: 'dragon',
     metadata: data,
     items: items,
-    moreItems: ["a"]
+    moreItems: ["a"],
+    unknownProperty: 'hello'
   }, function (err, result) {
     t.type(err, 'null', 'no error');
     id = result.id;
     t.type(result, 'object', 'result is object');
     t.equal(result.name, 'bobby', 'name is correct');
+    t.equal(result.unknownProperty, undefined, 'did not save unknown property');
     t.type(result.metadata, 'object', 'metadata is object');
     t.equal(result.metadata.foo, 'bar');
     t.equal(result.metadata.abc, 123);
@@ -263,12 +265,13 @@ test("executing creature.create - with bad input", function (t) {
 });
 
 test("executing creature.update", function (t) {
-  creature.update({ id: id, name: 'dave' }, function (err, result) {
+  creature.update({ id: id, name: 'dave', unknownProperty: 'hello' }, function (err, result) {
     t.type(err, 'null', 'updated dave - no error');
     t.type(result, 'object', 'updated dave - result is object');
     t.equal(result.name, "dave", 'updated dave - result.name == dave');
     t.equal(result.life, 10, 'updated dave - result.life == 10');
     t.equal(result.type, "dragon", 'updated dave - result.type == dragon');
+    t.equal(result.unknownProperty, undefined, 'did not save unknown property');
     //t.type(result.items, Array, 'items is array');
     t.end();
   });
@@ -276,12 +279,11 @@ test("executing creature.update", function (t) {
 
 test("executing creature.update", function (t) {
   creature.update({ id: id, name: 'bobby', life: 9999, items: items }, function (err, result) {
-    console.log('bbbb', err, result)
     t.type(err, 'null', 'updated bobby - no error');
     t.type(result, 'object', 'updated bobby - result is object');
     t.equal(result.life, 9999, 'updated bobby - result.life == 9999');
     t.equal(result.type, "dragon", 'updated bobby - result.type == dragon');
-    //t.type(result.items, Array, 'items is array');
+    // t.type(result.items, Array, 'items is array');
     t.end();
   });
 });

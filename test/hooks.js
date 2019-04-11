@@ -122,7 +122,7 @@ test("adding creature.after('create')", function (t) {
 });
 
 test("define vehicle resource - with datasource config - and before and after hooks added on same tick", function (t) {
-  vehicle = resource.define('vehicle', { config: { datasource: 'memory' }});
+  vehicle = resource.define('vehicle', { config: { datasource: 'memory' }, strictProperties: false });
   vehicle.property('fuel', {
     "type": "number",
     "default": 0
